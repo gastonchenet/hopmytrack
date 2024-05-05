@@ -1,0 +1,181 @@
+import Result from "./Result";
+import options from "../options";
+import UserAgent from "user-agents";
+import makeUsernames, {
+  type FindUsernamesOptions,
+} from "../util/makeUsernames";
+import findCountries from "../util/findCountries";
+import findNames from "../util/findNames";
+import findEmails from "../util/findEmails";
+import findPhones from "../util/findPhones";
+import findUrls from "../util/findUrls";
+import fetch from "../util/fetch";
+
+enum ErrorType {
+  STATUS_CODE,
+  RESPONSE_BODY,
+}
+
+type ExecuteFunction = (previousResult: Result) => Promise<Result[]>;
+
+type WebsiteOptions = {
+  title: string;
+  requestUrl: string;
+  responseUrl?: string;
+  requestInterval?: number;
+  nsfw?: boolean;
+  headers?: Record<string, string>;
+  usernameOptions?: FindUsernamesOptions;
+} & (
+  | { errorType: ErrorType.STATUS_CODE; errorBody?: never }
+  | { errorType: ErrorType.RESPONSE_BODY; errorBody: string | string[] }
+) &
+  (
+    | { findNames: true; nameSelector?: string }
+    | { findNames?: false; nameSelector?: never }
+  ) &
+  (
+    | { findCountries: true; countrySelector?: string }
+    | { findCountries?: false; countrySelector?: never }
+  ) &
+  (
+    | { findEmails: true; emailSelector?: string }
+    | { findEmails?: false; emailSelector?: never }
+  ) &
+  (
+    | { findPhones: true; phoneSelector: string }
+    | { findPhones?: false; phoneSelector?: never }
+  ) &
+  (
+    | { findUrls: true; urlSelector?: string; urlExclude?: string[] }
+    | { findUrls?: false; urlSelector?: never; urlExclude?: never }
+  );
+
+export default class Website {
+  public static ErrorType = ErrorType;
+  public static DEFAULT_HEADERS = {
+    "User-Agent": new UserAgent().toString(),
+    "Accept-Language": "en-US,en;q=0.9",
+  };
+
+  public static fromJSON(json: WebsiteOptions) {
+    if (!options.nsfw && json.nsfw) return new Website(async () => []);
+
+    const headers = { ...Website.DEFAULT_HEADERS, ...json.headers };
+
+    return new Website(async (previousResult) => {
+      const results: Result[] = [];
+      const usernames = makeUsernames(previousResult, json.usernameOptions);
+
+      for (const username of usernames) {
+        const requestUrl = json.requestUrl.replace(
+          /\{username\}/,
+          username.value
+        );
+
+        const response = await fetch(requestUrl, {
+          abortIfCached: true,
+          headers,
+        });
+
+        if (!response?.ok) {
+          if (json.requestInterval)
+            await new Promise((resolve) =>
+              setTimeout(resolve, json.requestInterval)
+            );
+
+          continue;
+        }
+
+        const html = await response.text();
+
+        if (
+          json.errorType === ErrorType.RESPONSE_BODY &&
+          ((typeof json.errorBody === "string" &&
+            html.includes(json.errorBody)) ||
+            (Array.isArray(json.errorBody) &&
+              json.errorBody.some((body) => html.includes(body))))
+        ) {
+          if (json.requestInterval)
+            await new Promise((resolve) =>
+              setTimeout(resolve, json.requestInterval)
+            );
+
+          continue;
+        }
+
+        const responseUrl =
+          json.responseUrl?.replace(/\{username\}/, username.value) ??
+          response.url;
+
+        const result = new Result({
+          title: json.title,
+          url: responseUrl,
+          nsfw: json.nsfw ?? false,
+          fetched: true,
+          parent: previousResult,
+          prob: username.prob,
+        });
+
+        result.addUsername(username.value, username.prob);
+
+        if (json.findNames) {
+          const { firstNames, lastNames } = findNames(html, json.nameSelector);
+
+          firstNames.forEach((firstName) => {
+            result.addFirstName(firstName.value, firstName.prob);
+          });
+
+          lastNames.forEach((lastName) => {
+            result.addLastName(lastName.value, lastName.prob);
+          });
+        }
+
+        if (json.findCountries) {
+          findCountries(html, json.countrySelector).forEach((country) => {
+            result.addCountry(country.value, country.prob);
+          });
+        }
+
+        if (json.findEmails) {
+          findEmails(html, json.emailSelector).forEach((email) => {
+            result.addEmail(email.value, email.prob);
+          });
+        }
+
+        if (json.findPhones) {
+          findPhones(html, json.phoneSelector).forEach((phone) => {
+            result.addPhone(phone.value, phone.prob);
+          });
+        }
+
+        if (json.findUrls) {
+          const exclude = [
+            ...(json.urlExclude ?? []),
+            new URL(requestUrl).hostname,
+          ];
+
+          if (json.responseUrl) exclude.push(new URL(responseUrl).hostname);
+
+          const urls = findUrls(result, html, json.urlSelector, exclude);
+          urls.forEach((url) => result.addUrl(url));
+        }
+
+        results.push(result);
+
+        if (json.requestInterval)
+          await new Promise((resolve) =>
+            setTimeout(resolve, json.requestInterval)
+          );
+      }
+
+      return results;
+    });
+  }
+
+  public execute: ExecuteFunction;
+
+  public constructor(execute: ExecuteFunction) {
+    this.execute = execute;
+  }
+}
