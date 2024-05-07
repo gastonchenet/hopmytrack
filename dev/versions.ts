@@ -45,6 +45,16 @@ fs.writeFileSync(
 	JSON.stringify({ ...tool, version: version.join(".") }, null, 2)
 );
 
-await $`git add .`;
-await $`git commit -m "${options.message}"`;
-await $`git push`;
+try {
+	await $`git add .`;
+	await $`git commit -m "${options.message}"`;
+	await $`git push`;
+} catch (error) {
+	fs.writeFileSync(
+		path.join(__dirname, "../tool.json"),
+		JSON.stringify(tool, null, 2)
+	);
+
+	console.error(error);
+	process.exit(1);
+}
