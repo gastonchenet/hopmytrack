@@ -7,8 +7,8 @@ import Result from "../structures/Result";
 const REGEX = new RegExp(
   `(?<=^|[^\\w])(?<firstName>${males.join("|")}|${females.join(
     "|"
-  )})(?:[\\s\\n](?<lastName>(?:[a-z]{2,})(?:[ -][a-z]{2,}){0,3}))?(?=$|[^\\w])`,
-  "g"
+  )})(?:[\\s\\n](?<lastName>[a-z]{2,}))?(?=$|[^\\w])`,
+  "gi"
 );
 
 export default function findNames(

@@ -1,34 +1,41 @@
-import type { ProbValue } from "../structures/Result";
+import type { Phone, ProbValue } from "../structures/Result";
 import findInPage from "./findInPage";
 import Result from "../structures/Result";
+import { findPhoneNumbersInText } from "libphonenumber-js";
 
 export default function findPhones(
-	html: string,
-	selector?: string
+  html: string,
+  selector?: string
 ): ProbValue<string>[] {
-	if (selector) html = findInPage(html, selector);
+  if (selector) html = findInPage(html, selector);
 
-	const results: ProbValue<string>[] = [];
-	const phones: Record<string, number> = {};
+  const results: ProbValue<Phone>[] = [];
+  const phones: Record<string, Omit<ProbValue<Phone>, "value">> = {};
 
-	const regex = /\+?(?:[0-9] ?){6,14}[0-9]/g;
-	let match;
+  const matches = findPhoneNumbersInText(html);
 
-	while ((match = regex.exec(html))) {
-		const phone = match[0];
+  for (const match of matches) {
+    const phone = match.number.number;
+    const country = match.number.country;
 
-		if (!phones[phone]) phones[phone] = 0;
-		phones[phone]++;
-	}
+    if (phones[phone]) {
+      phones[phone].prob++;
+    } else {
+      phones[phone] = { prob: 1, country };
+    }
+  }
 
-	const maxMatches = Math.max(...Object.values(phones));
+  const maxMatches = Math.max(...Object.values(phones).map(({ prob }) => prob));
 
-	for (const [phone, count] of Object.entries(phones)) {
-		results.push({
-			value: phone,
-			prob: (count / maxMatches) * Result.Prob.LIKELY,
-		});
-	}
+  for (const [phone, { prob, country }] of Object.entries(phones)) {
+    let newProb = (prob / maxMatches) * Result.Prob.LIKELY;
 
-	return results;
+    results.push({
+      value: phone,
+      prob: newProb,
+      country,
+    });
+  }
+
+  return results;
 }

@@ -7,11 +7,11 @@ export default Website.fromJSON({
   headers: Website.DEFAULT_HEADERS,
   requestInterval: 100,
   findNames: true,
-  findCountries: true,
+  findLocations: true,
   findUrls: true,
   findEmails: true,
   nameSelector: ".vcard-names",
-  countrySelector: "*[itemprop='homeLocation']",
+  locationSelector: "*[itemprop='homeLocation']",
   urlSelector: ".vcard-details *[itemprop='url'], .Layout-main",
   usernameOptions: {
     regex: /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/,
