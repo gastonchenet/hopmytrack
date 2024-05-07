@@ -1,7 +1,7 @@
 import { $ } from "bun";
 import fs from "fs";
 import path from "path";
-import parseArgs, { OptionPayloadType } from "../src/options";
+import parseArgs, { OptionPayloadType } from "../src/parseArgs";
 
 const options = parseArgs(Bun.argv.slice(2), {
 	message: {

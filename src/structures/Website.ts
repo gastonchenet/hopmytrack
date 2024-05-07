@@ -1,5 +1,5 @@
 import Result from "./Result";
-import { options } from "../cli";
+import options from "../options";
 import UserAgent from "user-agents";
 import makeUsernames, {
 	type FindUsernamesOptions,
@@ -58,12 +58,12 @@ export default class Website {
 		"Accept-Language": "en-US,en;q=0.9",
 	};
 
-	public static fromJSON(json: WebsiteOptions) {
-		if (!options.nsfw && json.nsfw) return new Website(async () => []);
+	public static fromJSON(id: string, json: WebsiteOptions) {
+		if (!options.nsfw && json.nsfw) return new Website(id, async () => []);
 
 		const headers = { ...Website.DEFAULT_HEADERS, ...json.headers };
 
-		return new Website(async (previousResult) => {
+		return new Website(id, async (previousResult) => {
 			const results: Result[] = [];
 			const usernames = makeUsernames(previousResult, json.usernameOptions);
 
@@ -109,6 +109,7 @@ export default class Website {
 					requestUrl;
 
 				const result = new Result({
+					id,
 					title: json.title,
 					url: responseUrl,
 					nsfw: json.nsfw ?? false,
@@ -174,9 +175,11 @@ export default class Website {
 		});
 	}
 
+	public id: string;
 	public execute: ExecuteFunction;
 
-	public constructor(execute: ExecuteFunction) {
+	public constructor(id: string, execute: ExecuteFunction) {
+		this.id = id;
 		this.execute = execute;
 	}
 }

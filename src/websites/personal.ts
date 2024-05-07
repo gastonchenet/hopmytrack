@@ -6,7 +6,7 @@ import findEmails from "../util/findEmails";
 import findPhones from "../util/findPhones";
 import findNames from "../util/findNames";
 import findUrls from "../util/findUrls";
-import { options } from "../cli";
+import options from "../options";
 
 const domains = [
 	"com",
@@ -101,7 +101,7 @@ async function websiteData(
 	}
 }
 
-export default new Website(async (previousResult) => {
+export default new Website("personal", async (previousResult) => {
 	const usernames = makeUsernames(previousResult, {
 		regex: /^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.[a-zA-Z]{2,})*$/g,
 	});
@@ -121,6 +121,7 @@ export default new Website(async (previousResult) => {
 					const html = await response.text();
 
 					const result = new Result({
+						id: "personal",
 						title: "Personal Website",
 						url: requestUrl,
 						fetched: true,

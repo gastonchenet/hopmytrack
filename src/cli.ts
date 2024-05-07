@@ -6,68 +6,7 @@ import path from "path";
 import Website from "./structures/Website";
 import logger from "./util/logger";
 import chalk from "chalk";
-import parseArgs, { OptionPayloadType } from "./options";
-
-const optionList = {
-	help: {
-		alias: "h",
-		unique: true,
-		type: OptionPayloadType.BOOLEAN,
-		description: "Show help about how to use the tool.",
-		usage: "--help",
-		default: false,
-	},
-	version: {
-		alias: "v",
-		unique: true,
-		type: OptionPayloadType.BOOLEAN,
-		description: "Show the version.",
-		usage: "--version",
-		default: false,
-	},
-	output: {
-		alias: "o",
-		unique: false,
-		type: OptionPayloadType.STRING,
-		description: "Output file.",
-		usage: "--output=<file>",
-		default: null,
-	},
-	verbose: {
-		alias: "V",
-		unique: false,
-		type: OptionPayloadType.BOOLEAN,
-		description: "Show verbose output.",
-		usage: "--verbose",
-		default: false,
-	},
-	nsfw: {
-		alias: "!",
-		unique: false,
-		type: OptionPayloadType.BOOLEAN,
-		description: "Enable NSFW content.",
-		usage: "--nsfw",
-		default: false,
-	},
-	colors: {
-		alias: "c",
-		unique: false,
-		type: OptionPayloadType.BOOLEAN,
-		description: "Enable colored output.",
-		usage: "--colors",
-		default: false,
-	},
-	depth: {
-		alias: "d",
-		unique: false,
-		type: OptionPayloadType.NUMBER,
-		description: "Set the depth of the recursion.",
-		usage: "--depth=<number>",
-		default: null,
-	},
-};
-
-const options = parseArgs(Bun.argv.slice(2), optionList);
+import options, { allowed, optionList } from "./options";
 
 if (options.version) {
 	console.log(tool.version);
@@ -77,11 +16,19 @@ if (options.version) {
 if (options.help) {
 	console.log("Options:");
 
+	const largestName = Math.max(
+		...Object.keys(optionList).map((name) => name.length)
+	);
+
+	const largestUsage = Math.max(
+		...Object.values(optionList).map((option) => option.usage.length)
+	);
+
 	for (const [name, option] of Object.entries(optionList)) {
 		console.log(
-			`  ${name.padEnd(10)} -${option.alias}, ${option.usage.padEnd(20)} ${
-				option.description
-			}`
+			`  ${name.padEnd(largestName + 3)} -${
+				option.alias
+			}, ${option.usage.padEnd(largestUsage + 3)} ${option.description}`
 		);
 	}
 
@@ -102,7 +49,7 @@ function handleResult(result: Result) {
 	logger.writeResult(result);
 
 	if (options.output) {
-		const outFile = path.join(__dirname, options.output);
+		const outFile = path.join(process.cwd(), options.output);
 		const outDir = path.dirname(outFile);
 
 		if (!fs.existsSync(outDir)) {
@@ -129,7 +76,13 @@ async function recursion(result: Result, iteration = 0) {
 
 	if (options.verbose) {
 		logger.log(
-			`Recursion ${options.colors ? chalk.cyan(iteration + 1) : iteration + 1}`
+			`Recursion ${options.colors ? chalk.cyan(iteration + 1) : iteration + 1}${
+				options.colors ? chalk.black("/") : "/"
+			}${
+				options.colors
+					? chalk.cyan(options.depth ?? "∞")
+					: options.depth ?? "Inf"
+			}`
 		);
 	}
 
@@ -143,6 +96,8 @@ async function recursion(result: Result, iteration = 0) {
 				__dirname,
 				w.fetchFunction
 			)).default;
+
+			if (!allowed(website.id)) return [];
 
 			const results = await website.execute(result);
 			results.forEach((r) => result.addUrl(r));
@@ -160,5 +115,3 @@ async function recursion(result: Result, iteration = 0) {
 }
 
 recursion(result);
-
-export { options };

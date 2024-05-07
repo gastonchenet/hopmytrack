@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import moment from "moment";
 import Result from "../structures/Result";
-import { options } from "../cli";
+import options from "../options";
 
 export default {
 	log(message: string): void {

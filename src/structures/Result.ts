@@ -5,7 +5,7 @@ import capitalize from "../util/capitalize";
 import roundDecimal from "../util/roundDecimal";
 import { getLocation, parseLocation } from "../util/findLocation";
 import logger from "../util/logger";
-import { options } from "../cli";
+import options, { allowed } from "../options";
 
 export type ProbValue<T> = T extends object
 	? T & { prob: number }
@@ -38,6 +38,7 @@ type SearchData = {
 	({ email?: string; emails?: never } | { email?: never; emails?: string[] });
 
 type ResultOptions = {
+	id: string;
 	title: string;
 	url?: string;
 	nsfw?: boolean;
@@ -94,6 +95,7 @@ export default class Result {
 
 	public static async fromSearchData(data: SearchData): Promise<Result> {
 		const result = new Result({
+			id: "root",
 			title: "Root",
 			prob: Prob.SURE,
 			fetched: true,
@@ -124,6 +126,7 @@ export default class Result {
 		return result;
 	}
 
+	public id: string;
 	public title: string;
 	public url: string | null = null;
 	public nsfw: boolean = false;
@@ -141,6 +144,7 @@ export default class Result {
 	public urls: ProbValue<Result>[] = [];
 
 	public constructor(options: ResultOptions) {
+		this.id = options.id;
 		this.title = options.title;
 
 		if (options.url) this.url = options.url;
@@ -269,6 +273,9 @@ export default class Result {
 			this.firstNames.push({ value: firstName, prob: prob * this.prob });
 		}
 
+		const shouldUpdateUsernames =
+			!this.root.likely.firstName && this.root.likely.lastName;
+
 		this.parent?.addFirstName(firstName, prob);
 	}
 
@@ -290,6 +297,9 @@ export default class Result {
 		} else {
 			this.lastNames.push({ value: lastName, prob: prob * this.prob });
 		}
+
+		const shouldUpdateUsernames =
+			this.root.likely.firstName && !this.root.likely.lastName;
 
 		this.parent?.addLastName(lastName, prob);
 	}
@@ -367,6 +377,8 @@ export default class Result {
 	}
 
 	public addUrl(result: Result): void {
+		if (!allowed(result.id)) return;
+
 		const existingUrl = this.findUrl(result);
 		if (existingUrl?.prob === Prob.SURE) return;
 
@@ -469,6 +481,7 @@ export default class Result {
 
 	public copy(): Result {
 		const result = new Result({
+			id: this.id,
 			title: this.title,
 			url: this.url ?? undefined,
 			nsfw: this.nsfw,
