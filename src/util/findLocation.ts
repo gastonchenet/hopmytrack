@@ -2,11 +2,12 @@ import type { Location, ProbValue } from "../structures/Result";
 import Result from "../structures/Result";
 import findInPage from "./findInPage";
 import { detect } from "country-in-text-detector";
+import unobfuscate from "./unobfuscate";
 
 export function parseLocation(location: Location): string {
   return location.city
-    ? `${location.city}, ${location.country}`
-    : location.country;
+    ? `${location.city.toLowerCase()}, ${location.country.toLowerCase()}`
+    : location.country.toLowerCase();
 }
 
 export function getLocation(text: string): Location {
@@ -15,12 +16,12 @@ export function getLocation(text: string): Location {
   const city = cityMatch?.name;
 
   const country =
-    matches.find((match) => match.type === "country")?.name ??
-    cityMatch?.countryName ??
-    "Unknown";
+    matches.find((match) => match.type === "country")?.name?.toLowerCase() ??
+    cityMatch?.countryName?.toLowerCase() ??
+    "unknown";
 
   const result: Location = { country };
-  if (city) result.city = city;
+  if (city) result.city = city.toLowerCase();
 
   return result;
 }
@@ -29,7 +30,8 @@ export default function findLocation(
   html: string,
   selector?: string
 ): ProbValue<Location>[] {
-  if (selector) html = findInPage(html, selector);
+  html = unobfuscate(html.toLowerCase());
+  if (selector) html = findInPage(html, selector.toLowerCase());
 
   const locations: ProbValue<Location>[] = [];
   const matches = detect(html);
@@ -56,8 +58,8 @@ export default function findLocation(
     const [country, city] = locationKey.split("-");
     const prob = (count / totalOccurrences) * Result.Prob.LIKELY;
 
-    const location: Location = { country };
-    if (city) location.city = city;
+    const location: Location = { country: country.toLowerCase() };
+    if (city) location.city = city.toLowerCase();
 
     locations.push({ ...location, prob });
   });

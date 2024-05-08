@@ -3,6 +3,7 @@ import males from "../data/males.json";
 import females from "../data/females.json";
 import findInPage from "./findInPage";
 import Result from "../structures/Result";
+import unobfuscate from "./unobfuscate";
 
 const REGEX = new RegExp(
   `(?<=^|[^\\w])(?<firstName>${males.join("|")}|${females.join(
@@ -15,7 +16,8 @@ export default function findNames(
   html: string,
   selector?: string
 ): { firstNames: ProbValue<string>[]; lastNames: ProbValue<string>[] } {
-  if (selector) html = findInPage(html, selector);
+  html = unobfuscate(html.toLowerCase());
+  if (selector) html = findInPage(html, selector.toLowerCase());
 
   const firstNames: ProbValue<string>[] = [];
   const lastNames: ProbValue<string>[] = [];

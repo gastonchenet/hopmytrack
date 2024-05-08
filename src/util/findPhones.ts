@@ -1,7 +1,17 @@
 import type { Phone, ProbValue } from "../structures/Result";
 import findInPage from "./findInPage";
 import Result from "../structures/Result";
-import { findPhoneNumbersInText } from "libphonenumber-js";
+import { findPhoneNumbersInText, parsePhoneNumber } from "libphonenumber-js";
+
+export function getPhone(text: string): Phone | null {
+  const phone = parsePhoneNumber(text);
+  if (!phone) return null;
+
+  return {
+    value: phone.number,
+    country: phone.country,
+  };
+}
 
 export default function findPhones(
   html: string,
