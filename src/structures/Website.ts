@@ -78,6 +78,8 @@ export default class Website {
           headers,
         });
 
+        if (response?.status === 408) continue;
+
         if (!response?.ok) {
           if (json.requestInterval)
             await new Promise((resolve) =>

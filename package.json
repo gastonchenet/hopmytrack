@@ -1,6 +1,6 @@
 {
   "name": "hopmytrack",
-  "module": "./src/cli.ts",
+  "module": "./src/root.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",

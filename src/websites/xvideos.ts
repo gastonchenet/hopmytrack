@@ -5,7 +5,7 @@ export default Website.fromJSON("xvideos", {
   requestUrl: "https://xvideos.com/profiles/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
-  requestInterval: 1000,
+  requestInterval: 500,
   usernameOptions: {
     regex: /^[a-zA-Z0-9_-]{3,30}$/,
   },

@@ -15,8 +15,8 @@ export enum Gender {
 }
 
 export type ProbValue<T> = T extends object
-  ? T & { prob: number }
-  : { value: T; prob: number };
+  ? T & { prob: number; new: boolean }
+  : { value: T; prob: number; new: boolean };
 
 export type Email = {
   value: string;
@@ -80,7 +80,6 @@ type URLResult = {
   prob: number;
   nsfw: boolean;
   fetched: boolean;
-  paths: string[];
 };
 
 type LikelyResult = {
@@ -97,7 +96,6 @@ type JSONResult = {
   title: string;
   url: string | null;
   nsfw: boolean;
-  paths: string[];
   fetched: boolean;
   prob: number;
   usernames: ProbValue<string>[];
@@ -147,6 +145,8 @@ export default class Result {
     if (data.location)
       result.addLocation(getLocation(data.location), Prob.SURE);
 
+    result.nextTurn();
+
     return result;
   }
 
@@ -156,7 +156,6 @@ export default class Result {
   public nsfw: boolean;
   public parent: Result | null;
   public fetched: boolean;
-  public paths: string[] = [];
 
   public usernames: ProbValue<string>[] = [];
   public firstNames: ProbValue<FirstName>[] = [];
@@ -164,7 +163,7 @@ export default class Result {
   public locations: ProbValue<Location>[] = [];
   public emails: ProbValue<Email>[] = [];
   public phones: ProbValue<Phone>[] = [];
-  public urls: ProbValue<Result>[] = [];
+  public urls: Result[] = [];
 
   public constructor(options: ResultOptions) {
     this.id = options.id;
@@ -195,6 +194,8 @@ export default class Result {
   }
 
   public get prob(): number {
+    if (this.id === "root") return Prob.SURE;
+
     let prob = this.username?.prob;
 
     if (this.hasInfoInUsername(this.firstNames)) {
@@ -263,10 +264,16 @@ export default class Result {
   public get likely(): LikelyResult {
     return {
       usernames: this.usernames.filter(
-        (u) => u.prob > (Prob.LIKELY + Prob.MAYBE) / 2
+        (u) => u.prob > (Prob.LIKELY + Prob.MAYBE) / 2 && !u.new
       ),
-      firstName: this.firstNames.sort((a, b) => b.prob - a.prob)[0] ?? null,
-      lastName: this.lastNames.sort((a, b) => b.prob - a.prob)[0] ?? null,
+      firstName:
+        this.firstNames
+          .filter((n) => !n.new)
+          .sort((a, b) => b.prob - a.prob)[0] ?? null,
+      lastName:
+        this.lastNames
+          .filter((n) => !n.new)
+          .sort((a, b) => b.prob - a.prob)[0] ?? null,
       location: this.locations.sort((a, b) => b.prob - a.prob)[0] ?? null,
       emails: this.emails.filter((u) => u.prob >= Prob.LIKELY),
       phone: this.phones.sort((a, b) => b.prob - a.prob)[0] ?? null,
@@ -278,7 +285,6 @@ export default class Result {
           prob: r.prob,
           nsfw: r.nsfw,
           fetched: r.fetched,
-          paths: r.paths,
         })),
     };
   }
@@ -289,31 +295,61 @@ export default class Result {
   }
 
   public equals(result: Result): boolean {
-    return (
-      this.title === result.title &&
-      this.url === result.url &&
-      this.nsfw === result.nsfw &&
-      this.fetched === result.fetched &&
-      this.prob === result.prob &&
-      this.usernames.length === result.usernames.length &&
-      this.firstNames.length === result.firstNames.length &&
-      this.lastNames.length === result.lastNames.length &&
-      this.locations.length === result.locations.length &&
-      this.emails.length === result.emails.length &&
-      this.phones.length === result.phones.length &&
-      this.urls.length === result.urls.length &&
-      this.usernames.every((u, i) => u.value === result.usernames[i].value) &&
-      this.firstNames.every((n, i) => n.value === result.firstNames[i].value) &&
-      this.lastNames.every((n, i) => n.value === result.lastNames[i].value) &&
-      this.locations.every(
-        (c, i) =>
-          c.country === result.locations[i].country &&
-          c.city === result.locations[i].city
-      ) &&
-      this.emails.every((e, i) => e.value === result.emails[i].value) &&
-      this.phones.every((p, i) => p.value === result.phones[i].value) &&
-      this.urls.every((r, i) => r.equals(result.urls[i]))
-    );
+    if (this.title !== result.title) return false;
+    if (this.url !== result.url) return false;
+    if (this.nsfw !== result.nsfw) return false;
+    if (this.fetched !== result.fetched) return false;
+    if (this.prob !== result.prob) return false;
+    if (this.usernames.length !== result.usernames.length) return false;
+    if (this.firstNames.length !== result.firstNames.length) return false;
+    if (this.lastNames.length !== result.lastNames.length) return false;
+    if (this.locations.length !== result.locations.length) return false;
+    if (this.emails.length !== result.emails.length) return false;
+    if (this.phones.length !== result.phones.length) return false;
+    if (this.urls.length !== result.urls.length) return false;
+
+    if (
+      this.usernames.some(
+        (u) => !result.usernames.some((r) => r.value === u.value)
+      )
+    )
+      return false;
+
+    if (
+      this.firstNames.some(
+        (n) => !result.firstNames.some((r) => r.value === n.value)
+      )
+    )
+      return false;
+
+    if (
+      this.lastNames.some(
+        (n) => !result.lastNames.some((r) => r.value === n.value)
+      )
+    )
+      return false;
+
+    if (
+      this.locations.some(
+        (l) => !result.locations.some((r) => r.country === l.country)
+      )
+    )
+      return false;
+
+    if (
+      this.emails.some((e) => !result.emails.some((r) => r.value === e.value))
+    )
+      return false;
+
+    if (
+      this.phones.some((p) => !result.phones.some((r) => r.value === p.value))
+    )
+      return false;
+
+    if (this.urls.some((r) => !result.urls.some((u) => r.equals(u))))
+      return false;
+
+    return true;
   }
 
   public copy(): Result {
@@ -342,7 +378,6 @@ export default class Result {
       title: this.title,
       url: this.url,
       nsfw: this.nsfw,
-      paths: this.paths,
       fetched: this.fetched,
       prob: this.prob,
       usernames: this.usernames,
@@ -372,15 +407,13 @@ export default class Result {
           : !options["no-color"]
           ? chalk.red("-")
           : "-"
-      }${!options["no-color"] ? chalk.black(")") : ")"} ${
-        this.title
-      }${chalk.black(":")}${
+      }${!options["no-color"] ? chalk.black(")") : ")"} ${this.title}${
         this.nsfw
           ? ` ${!options["no-color"] ? chalk.black("(") : "("}${
               !options["no-color"] ? chalk.red("!") : "!"
             }${!options["no-color"] ? chalk.black(")") : ")"}`
           : ""
-      } ${
+      }${chalk.black(":")} ${
         !options["no-color"] ? chalk.cyan(chalk.underline(this.url)) : this.url
       } ${
         !options["no-color"]
@@ -522,6 +555,16 @@ export default class Result {
     return lines.join("\n");
   }
 
+  public nextTurn() {
+    this.usernames.forEach((username) => (username.new = false));
+    this.firstNames.forEach((firstName) => (firstName.new = false));
+    this.lastNames.forEach((lastName) => (lastName.new = false));
+    this.locations.forEach((location) => (location.new = false));
+    this.emails.forEach((email) => (email.new = false));
+    this.phones.forEach((phone) => (phone.new = false));
+    this.urls.forEach((url) => url.nextTurn());
+  }
+
   private getFirstName(firstName: string) {
     return this.root.firstNames.find((n) => n.value === firstName);
   }
@@ -530,7 +573,7 @@ export default class Result {
     return this.root.lastNames.find((n) => n.value === lastName);
   }
 
-  private getCounry(location: Location) {
+  private getCountry(location: Location) {
     return this.root.locations.find((l) => l.country === location.country);
   }
 
@@ -563,7 +606,7 @@ export default class Result {
         prob
       );
     } else {
-      this.usernames.push({ value: username, prob });
+      this.usernames.push({ value: username, prob, new: true });
     }
   }
 
@@ -577,7 +620,7 @@ export default class Result {
       existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
     }
 
-    this.firstNames.push({ value: firstName, gender, prob });
+    this.firstNames.push({ value: firstName, gender, prob, new: true });
     this.parent?.addFirstName(firstName, prob);
   }
 
@@ -590,12 +633,12 @@ export default class Result {
       existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
     }
 
-    this.lastNames.push({ value: lastName, prob });
+    this.lastNames.push({ value: lastName, prob, new: true });
     this.parent?.addLastName(lastName, prob);
   }
 
   public addLocation(location: Location, prob: number) {
-    const country = this.getCounry(location);
+    const country = this.getCountry(location);
     const city = location.city ? this.getCity(location) : null;
 
     if (country) {
@@ -606,7 +649,7 @@ export default class Result {
       city.prob = prob = (Math.max(city.prob, prob) + Prob.SURE) / 2;
     }
 
-    this.locations.push({ ...location, prob });
+    this.locations.push({ ...location, prob, new: true });
     this.parent?.addLocation(location, prob);
   }
 
@@ -618,7 +661,7 @@ export default class Result {
       existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
     } else {
       const verified = await verifyEmail(email);
-      this.emails.push({ value: email, prob, verified });
+      this.emails.push({ value: email, prob, verified, new: true });
     }
 
     this.parent?.addEmail(email, prob);
@@ -633,7 +676,7 @@ export default class Result {
       existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
     }
 
-    this.phones.push({ ...phone, prob });
+    this.phones.push({ ...phone, prob, new: true });
     this.parent?.addPhone(phone, prob);
   }
 
@@ -641,14 +684,17 @@ export default class Result {
     if (!allowed(result.id)) return;
 
     const existing = this.getUrl(result.url!);
-    result.username!.prob = (result.prob * this.prob + this.prob) / 2;
+    result.username!.prob = (result.prob * this.prob + result.prob) / 2;
 
     if (existing) {
-      existing.prob = result.username!.prob =
+      result.username!.prob =
         (Math.max(existing.prob, result.prob) + Prob.SURE) / 2;
+
+      if (result.fetched) existing.fetched = true;
+    } else {
+      this.urls.push(result);
     }
 
-    this.urls.push(result);
     this.addUsername(result.username!.value, result.prob);
     this.parent?.addUrl(result);
   }

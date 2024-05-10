@@ -5,7 +5,7 @@ export default Website.fromJSON("xhamster", {
   requestUrl: "https://xhamster.com/users/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
-  requestInterval: 1000,
+  requestInterval: 500,
   usernameOptions: {
     regex: /^[a-zA-Z0-9][a-zA-Z0-9._-]{4,}[a-zA-Z0-9]$/,
   },

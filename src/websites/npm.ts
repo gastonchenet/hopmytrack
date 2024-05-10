@@ -2,7 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("npm", {
   title: "NPM",
-  requestUrl: "https://www.npmjs.com/~{username}",
+  requestUrl: "https://npmjs.com/~{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
   requestInterval: 1000,

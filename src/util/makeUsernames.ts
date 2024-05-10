@@ -46,7 +46,11 @@ function removeDuplicateUsernames(usernames: ProbValue<string>[]) {
 }
 
 function derivateUsername(username: ProbValue<string>) {
-  const from = [username, { value: username.value + "_", prob: username.prob }];
+  const from = [
+    username,
+    { value: username.value + "_", prob: username.prob, new: true },
+  ];
+
   const usernames: ProbValue<string>[] = [...from];
 
   from.forEach((username) => {
@@ -60,6 +64,7 @@ function derivateUsername(username: ProbValue<string>) {
         usernames.push({
           value: newUsername.trim(),
           prob: Result.Prob.SURE,
+          new: true,
         });
       }
     });
@@ -73,10 +78,12 @@ function derivateNames(firstName: string, lastName: string) {
     ...derivateUsername({
       value: `${firstName}${DEFAULT_SEPARATOR}${lastName}`,
       prob: Result.Prob.LIKELY,
+      new: true,
     }),
     ...derivateUsername({
       value: `${firstName[0]}${DEFAULT_SEPARATOR}${lastName}`,
       prob: Result.Prob.MAYBE,
+      new: true,
     }),
   ];
 
@@ -90,13 +97,15 @@ export default function makeUsernames(
   const usernames: ProbValue<string>[] = [];
 
   if (!options.excludeUsernames) {
-    previousResult.usernames.forEach((username) => {
-      derivateUsername(username).forEach((username) => {
-        if (!usernames.some((u) => u.value === username.value)) {
-          usernames.push(username);
-        }
+    previousResult.usernames
+      .filter((u) => !u.new)
+      .forEach((username) => {
+        derivateUsername(username).forEach((username) => {
+          if (!usernames.some((u) => u.value === username.value)) {
+            usernames.push(username);
+          }
+        });
       });
-    });
   }
 
   if (!options.excludeNames) {

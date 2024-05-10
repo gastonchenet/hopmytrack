@@ -10,6 +10,6 @@ export default Website.fromJSON("deviantart", {
   findUrls: true,
   urlSelector: ".surface.surface-secondary",
   usernameOptions: {
-    regex: /^[a-zA-Z][a-zA-Z0-9_-]*$/,
+    regex: /^[a-zA-Z][a-zA-Z0-9]*$/,
   },
 });

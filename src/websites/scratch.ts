@@ -5,7 +5,7 @@ export default Website.fromJSON("scratch", {
   requestUrl: "https://scratch.mit.edu/users/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
-  requestInterval: 1000,
+  requestInterval: 500,
   findLocations: true,
   locationSelector: ".location",
   usernameOptions: {

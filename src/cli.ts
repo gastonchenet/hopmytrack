@@ -1,60 +1,27 @@
-import tool from "../tool.json";
-import Result from "./structures/Result";
+import Result, { type SearchData } from "./structures/Result";
 import websites from "./websites";
 import fs from "fs";
 import path from "path";
 import Website from "./structures/Website";
 import logger from "./util/logger";
 import chalk from "chalk";
-import options, { allowed, optionList } from "./options";
+import options, { allowed } from "./options";
 
 const SPINNER_CHARS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
-if (options.version) {
-  console.log(tool.version);
-  process.exit(0);
-}
-
-if (options.help) {
-  console.log("Options:");
-
-  const largestName = Math.max(
-    ...Object.keys(optionList).map((name) => name.length)
-  );
-
-  const largestUsage = Math.max(
-    ...Object.values(optionList).map((option) => option.usage.length)
-  );
-
-  for (const [name, option] of Object.entries(optionList).sort((a, b) =>
-    a[0].localeCompare(b[0])
-  )) {
-    console.log(
-      `  ${name.padEnd(largestName + 3)} -${
-        option.alias
-      }, ${option.usage.padEnd(largestUsage + 3)} ${option.description}`
-    );
-  }
-
-  process.exit(0);
-}
-
-const result = await Result.fromSearchData({
-  username: "du_cassoulet",
-});
+const FETCHING_MESSAGES = [
+  "Sniffin' the web for you",
+  "Sending my gobelins to fetch the data",
+  "Looking for the data in the dark web",
+  "Hacking the mainframe",
+  "Entering the matrix",
+  "Searching for the data in the deep web",
+];
 
 let interval: Timer | null = null;
 
-if (!options.verbose) {
-  interval = setInterval(() => {
-    process.stdout.write(
-      (!options["no-color"]
-        ? chalk.cyan(SPINNER_CHARS[Math.floor(Date.now() / 100) % 10])
-        : SPINNER_CHARS[Math.floor(Date.now() / 100) % 10]) +
-        " Sniffin' the web for you...\u001B[?25l\r"
-    );
-  }, 100);
-}
+const message =
+  FETCHING_MESSAGES[Math.floor(Math.random() * FETCHING_MESSAGES.length)];
 
 function handleResult(result: Result) {
   if (interval) clearInterval(interval);
@@ -82,6 +49,18 @@ function handleResult(result: Result) {
 }
 
 async function recursion(result: Result, iteration = 0) {
+  if (!options.verbose && iteration === 0) {
+    interval = setInterval(() => {
+      process.stdout.write(
+        `${
+          !options["no-color"]
+            ? chalk.cyan(SPINNER_CHARS[Math.floor(Date.now() / 100) % 10])
+            : SPINNER_CHARS[Math.floor(Date.now() / 100) % 10]
+        } ${message}...\u001B[?25l\r`
+      );
+    }, 100);
+  }
+
   if (options.depth !== null && iteration >= options.depth) {
     handleResult(result);
     return;
@@ -115,6 +94,7 @@ async function recursion(result: Result, iteration = 0) {
     })
   );
 
+  result.nextTurn();
   if (previousResult.equals(result)) {
     handleResult(result);
     return;
@@ -123,4 +103,7 @@ async function recursion(result: Result, iteration = 0) {
   recursion(result, iteration + 1);
 }
 
-recursion(result);
+export default async function lookup(searchData: SearchData) {
+  const result = await Result.fromSearchData(searchData);
+  recursion(result);
+}

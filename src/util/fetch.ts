@@ -12,7 +12,7 @@ export default function fetch(
 ): Promise<Response | null> {
   return new Promise((resolve) => {
     if (options.abortIfCached && cache.has(url)) {
-      resolve(null);
+      resolve(new Response(null, { status: 408 }));
       return;
     }
 
@@ -29,7 +29,12 @@ export default function fetch(
         clearTimeout(timer);
         resolve(res);
       })
-      .catch(() => {
+      .catch((error) => {
+        if (error === "AbortError") {
+          resolve(new Response(null, { status: 408 }));
+          return;
+        }
+
         clearTimeout(timer);
         resolve(null);
       });

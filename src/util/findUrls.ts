@@ -33,9 +33,9 @@ export default function findUrls(
 
       const result: RawResult = {
         id: website.id,
-        username: firstMatch.groups?.username,
+        username: firstMatch.groups?.username.toLowerCase(),
         title: website.title!,
-        url: firstMatch[0],
+        url: firstMatch[0].toLowerCase(),
         prob: filtered.length,
       };
 

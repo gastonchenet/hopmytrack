@@ -6,7 +6,7 @@ export default Website.fromJSON("twitter", {
   responseUrl: "https://twitter.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
-  requestInterval: 1000,
+  requestInterval: 500,
   findNames: true,
   findLocations: true,
   findUrls: true,
@@ -14,6 +14,6 @@ export default Website.fromJSON("twitter", {
   locationSelector: ".profile-location",
   urlSelector: ".profile-website",
   usernameOptions: {
-    regex: /^@?(\w){1,15}$/i,
+    regex: /^[a-zA-Z0-9]{1,15}$/i,
   },
 });
