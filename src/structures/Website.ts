@@ -43,7 +43,7 @@ type WebsiteOptions = {
     | { findEmails?: false; emailSelector?: never }
   ) &
   (
-    | { findPhones: true; phoneSelector: string }
+    | { findPhones: true; phoneSelector?: string }
     | { findPhones?: false; phoneSelector?: never }
   ) &
   (

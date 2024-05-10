@@ -8,6 +8,8 @@ import logger from "./util/logger";
 import chalk from "chalk";
 import options, { allowed, optionList } from "./options";
 
+const SPINNER_CHARS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+
 if (options.version) {
   console.log(tool.version);
   process.exit(0);
@@ -38,17 +40,25 @@ if (options.help) {
 }
 
 const result = await Result.fromSearchData({
-  username: "wonderhunter",
-  firstName: "Loris",
-  lastName: "Balocchi",
+  username: "du_cassoulet",
 });
 
+let interval: Timer | null = null;
+
 if (!options.verbose) {
-  logger.log("Searching for data...");
+  interval = setInterval(() => {
+    process.stdout.write(
+      (!options["no-color"]
+        ? chalk.cyan(SPINNER_CHARS[Math.floor(Date.now() / 100) % 10])
+        : SPINNER_CHARS[Math.floor(Date.now() / 100) % 10]) +
+        " Sniffin' the web for you...\u001B[?25l\r"
+    );
+  }, 100);
 }
 
 function handleResult(result: Result) {
-  console.log();
+  if (interval) clearInterval(interval);
+  process.stdout.write("\r\x1b[K\u001B[?25h");
   logger.writeResult(result);
 
   if (options.output) {

@@ -59,7 +59,7 @@ function derivateUsername(username: ProbValue<string>) {
       if (!usernames.some((u) => u.value === newUsername.trim())) {
         usernames.push({
           value: newUsername.trim(),
-          prob: Result.Prob.LIKELY,
+          prob: Result.Prob.SURE,
         });
       }
     });

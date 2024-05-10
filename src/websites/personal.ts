@@ -124,6 +124,7 @@ export default new Website("personal", async (previousResult) => {
             id: "personal",
             title: "Personal Website",
             url: requestUrl,
+            username: username.value,
             fetched: true,
             parent: previousResult,
             prob: username.prob,

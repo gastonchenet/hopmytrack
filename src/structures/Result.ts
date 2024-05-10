@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import makeUsernames, { usernameComplexity } from "../util/makeUsernames";
+import { usernameComplexity } from "../util/makeUsernames";
 import verifyEmail from "../util/verifyEmail";
 import capitalize from "../util/capitalize";
 import roundDecimal from "../util/roundDecimal";
@@ -7,6 +7,12 @@ import { getLocation, parseLocation } from "../util/findLocation";
 import logger from "../util/logger";
 import options, { allowed } from "../options";
 import { getPhone } from "../util/findPhones";
+import { getGender } from "../util/findNames";
+
+export enum Gender {
+  MALE,
+  FEMALE,
+}
 
 export type ProbValue<T> = T extends object
   ? T & { prob: number }
@@ -25,6 +31,11 @@ export type Location = {
 export type Phone = {
   value: string;
   country?: string;
+};
+
+export type FirstName = {
+  value: string;
+  gender?: Gender;
 };
 
 export type SearchData = {
@@ -74,7 +85,7 @@ type URLResult = {
 
 type LikelyResult = {
   usernames: ProbValue<string>[];
-  firstName: ProbValue<string> | null;
+  firstName: ProbValue<FirstName> | null;
   lastName: ProbValue<string> | null;
   location: ProbValue<Location> | null;
   emails: ProbValue<Email>[];
@@ -102,6 +113,10 @@ export default class Result {
   public static Prob = Prob;
   public static LogType = LogType;
 
+  private static stackProbs<T>(values: ProbValue<T>[]): number | undefined {
+    return values.reduce((acc, val) => acc + val.prob, 0) / values.length;
+  }
+
   public static async fromSearchData(data: SearchData): Promise<Result> {
     const result = new Result({
       id: "root",
@@ -111,10 +126,10 @@ export default class Result {
     });
 
     if ("username" in data && data.username) {
-      result.addUsername(data.username, Prob.LIKELY);
+      result.addUsername(data.username, Prob.SURE);
     } else if ("usernames" in data && data.usernames) {
       for (const username of data.usernames) {
-        result.addUsername(username, Prob.LIKELY);
+        result.addUsername(username, Prob.SURE);
       }
     }
 
@@ -144,7 +159,7 @@ export default class Result {
   public paths: string[] = [];
 
   public usernames: ProbValue<string>[] = [];
-  public firstNames: ProbValue<string>[] = [];
+  public firstNames: ProbValue<FirstName>[] = [];
   public lastNames: ProbValue<string>[] = [];
   public locations: ProbValue<Location>[] = [];
   public emails: ProbValue<Email>[] = [];
@@ -171,21 +186,52 @@ export default class Result {
     return this.usernames[0] ?? null;
   }
 
+  public hasInfoInUsername(values: ProbValue<string>[]) {
+    for (const { value } of values) {
+      if (this.root.usernames.some((u) => u.value.includes(value))) return true;
+    }
+
+    return false;
+  }
+
   public get prob(): number {
-    if (!this.username) return Prob.SURE;
+    let prob = this.username?.prob;
 
-    let prob = this.username.prob;
+    if (this.hasInfoInUsername(this.firstNames)) {
+      if (prob === undefined) {
+        prob = Result.stackProbs(this.firstNames);
+      } else if (this.firstNames.length > 0) {
+        prob = (prob + Result.stackProbs(this.firstNames)! + Prob.SURE) / 3;
+      }
+    }
 
-    if (this.firstNames.length > 0)
-      prob = (prob + this.firstNames[0].prob + Prob.SURE) / 3;
+    if (this.hasInfoInUsername(this.lastNames)) {
+      if (prob === undefined) {
+        prob = Result.stackProbs(this.lastNames);
+      } else if (this.lastNames.length > 0) {
+        prob = (prob + Result.stackProbs(this.lastNames)! + Prob.SURE) / 3;
+      }
+    }
 
-    if (this.lastNames.length > 0)
-      prob = (prob + this.lastNames[0].prob + Prob.SURE) / 3;
+    if (prob === undefined) {
+      prob = Result.stackProbs(this.locations);
+    } else if (this.locations.length > 0) {
+      prob = (prob + Result.stackProbs(this.locations)! + Prob.SURE) / 3;
+    }
 
-    if (this.locations.length > 0)
-      prob = (prob + this.locations[0].prob + Prob.SURE) / 3;
+    if (prob === undefined) {
+      prob = Result.stackProbs(this.emails);
+    } else if (this.emails.length > 0) {
+      prob = (prob + Result.stackProbs(this.emails)! + Prob.SURE) / 3;
+    }
 
-    return prob ?? Prob.SURE;
+    if (prob === undefined) {
+      prob = Result.stackProbs(this.phones);
+    } else if (this.phones.length > 0) {
+      prob = (prob + Result.stackProbs(this.phones)! + Prob.SURE) / 3;
+    }
+
+    return prob ?? Prob.NO;
   }
 
   public get firstName(): string | null {
@@ -371,6 +417,18 @@ export default class Result {
           colored
             ? chalk.cyan(capitalize(likely.firstName.value))
             : capitalize(likely.firstName.value)
+        }${
+          likely.firstName.gender !== undefined
+            ? ` ${colored ? chalk.black("(") : "("}${
+                (likely.firstName.gender as Gender) === Gender.MALE
+                  ? colored
+                    ? chalk.blue("♂")
+                    : "Male"
+                  : colored
+                  ? chalk.red("♀")
+                  : "Female"
+              }${colored ? chalk.black(")") : ")"}`
+            : ""
         }`
       );
     }
@@ -495,10 +553,15 @@ export default class Result {
   private addUsername(username: string, prob: number) {
     username = username.trim().toLowerCase();
     prob *= usernameComplexity(username);
+
     const existing = this.usernames.find((u) => u.value === username);
 
     if (existing) {
-      existing.prob = Math.max(existing.prob, prob);
+      existing.prob = prob = Math.max(
+        existing.prob,
+        (prob + Prob.LIKELY) / 2,
+        prob
+      );
     } else {
       this.usernames.push({ value: username, prob });
     }
@@ -508,12 +571,13 @@ export default class Result {
     firstName = firstName.trim().toLowerCase();
     if (this.firstName !== firstName) prob = Prob.NO;
     const existing = this.getFirstName(firstName);
+    const gender = getGender(firstName);
 
     if (existing) {
       existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
     }
 
-    this.firstNames.push({ value: firstName, prob });
+    this.firstNames.push({ value: firstName, gender, prob });
     this.parent?.addFirstName(firstName, prob);
   }
 
@@ -574,6 +638,8 @@ export default class Result {
   }
 
   public addUrl(result: Result) {
+    if (!allowed(result.id)) return;
+
     const existing = this.getUrl(result.url!);
     result.username!.prob = (result.prob * this.prob + this.prob) / 2;
 

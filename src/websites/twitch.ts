@@ -6,7 +6,7 @@ export default Website.fromJSON("twitch", {
   responseUrl: "https://twitch.tv/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
-  requestInterval: 500,
+  requestInterval: 1000,
   findUrls: true,
   urlSelector: ".tw-link[role='link']",
   usernameOptions: {

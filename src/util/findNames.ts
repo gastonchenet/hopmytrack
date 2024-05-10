@@ -2,7 +2,7 @@ import type { ProbValue } from "../structures/Result";
 import males from "../data/males.json";
 import females from "../data/females.json";
 import findInPage from "./findInPage";
-import Result from "../structures/Result";
+import Result, { Gender } from "../structures/Result";
 import unobfuscate from "./unobfuscate";
 
 const REGEX = new RegExp(
@@ -11,6 +11,20 @@ const REGEX = new RegExp(
   )})(?:[\\s\\n](?<lastName>[a-z]{2,}))?(?=$|[^\\w])`,
   "gi"
 );
+
+export function nameComplexity(name: string) {
+  return Math.max(0, name.length / (name.length + 1) - 0.5) * 2;
+}
+
+export function getGender(firstName: string) {
+  let gender;
+
+  if (males.includes(firstName.trim().toLowerCase())) gender = Gender.MALE;
+  if (females.includes(firstName.trim().toLowerCase()))
+    gender = gender === undefined ? Gender.FEMALE : undefined;
+
+  return gender;
+}
 
 export default function findNames(
   html: string,
