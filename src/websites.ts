@@ -229,4 +229,38 @@ export default Object.freeze([
     regex:
       /(?:https?:\/\/)?(?:www\.)?last\.fm\/user\/(?<username>[a-zA-Z0-9][a-zA-Z0-9._-]{1,14})/gi,
   },
+  {
+    title: "BodySpace",
+    id: "bodyspace",
+    fetchFunction: "websites/bodyspace.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?bodyspace\.bodybuilding\.com\/(?<username>(?![_.-])[a-zA-Z0-9_-]{3,30}(?<![_-]))/gi,
+  },
+  {
+    title: "Flickr",
+    id: "flickr",
+    fetchFunction: "websites/flickr.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?flickr\.com\/people\/(?<username>[a-zA-Z0-9._-]{3,30})/gi,
+  },
+  {
+    title: "Imgur",
+    id: "imgur",
+    fetchFunction: "websites/imgur.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?imgur\.com\/user\/(?<username>[a-zA-Z][a-zA-Z0-9_]{2,29})/gi,
+  },
+  {
+    title: "Itch.io",
+    id: "itchio",
+    fetchFunction: "websites/itchio.ts",
+    regex: /(?:https?:\/\/)?(?:www\.)?itch\.io\/(?<username>[a-zA-Z0-9@_-]+)/gi,
+  },
+  {
+    title: "Kick",
+    id: "kick",
+    fetchFunction: "websites/kick.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?kick\.com\/(?<username>(?![_.-])[a-zA-Z0-9_-]{3,30}(?<![_-]))/gi,
+  },
 ]);

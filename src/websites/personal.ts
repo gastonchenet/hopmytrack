@@ -8,6 +8,7 @@ import findNames from "../util/findNames";
 import findUrls from "../util/findUrls";
 import options from "../options";
 
+const blacklistedLinks = ["facebook.com/plesk"];
 const domains = [
   "com",
   "org",
@@ -65,7 +66,11 @@ async function websiteData(
   const { firstNames, lastNames } = findNames(html);
   const emails = findEmails(html);
   const phones = findPhones(html);
-  const urls = findUrls(result, html, [new URL(url).hostname]);
+
+  const urls = findUrls(result, html, [
+    new URL(url).hostname,
+    ...blacklistedLinks,
+  ]);
 
   firstNames.forEach((firstName) => {
     result.addFirstName(firstName.value, firstName.prob);

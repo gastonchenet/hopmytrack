@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("xhamster", {
   title: "Xhamster",
+  nsfw: true,
   requestUrl: "https://xhamster.com/users/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

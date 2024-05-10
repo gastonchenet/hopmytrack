@@ -99,13 +99,13 @@ export const optionList = {
     usage: "--input=<file>",
     default: null,
   },
-  "save-input": {
-    alias: "s",
+  proxy: {
+    alias: "p",
     unique: false,
-    type: OptionPayloadType.BOOLEAN,
-    description: "Save the input data.",
-    usage: "--save-input",
-    default: false,
+    type: OptionPayloadType.STRING,
+    description: "Set a proxy.",
+    usage: "--proxy=<proxy>",
+    default: null,
   },
 };
 

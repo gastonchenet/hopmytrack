@@ -1,3 +1,5 @@
+import startOptions from "../options";
+
 type FetchOptions = {
   timeout?: number;
   abortIfCached?: boolean;
@@ -20,6 +22,7 @@ export default function fetch(
     const controller = new AbortController();
     const timeout = options.timeout ?? DEFAULT_TIMEOUT;
     options.signal = options.signal ?? controller.signal;
+    if (startOptions.proxy) startOptions.proxy = options.proxy;
 
     const timer = setTimeout(() => controller.abort(), timeout);
 

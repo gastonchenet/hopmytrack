@@ -14,6 +14,7 @@ import fetch from "../util/fetch";
 enum ErrorType {
   STATUS_CODE,
   RESPONSE_BODY,
+  RESPONSE_URL,
 }
 
 type ExecuteFunction = (previousResult: Result) => Promise<Result[]>;
@@ -27,8 +28,13 @@ type WebsiteOptions = {
   headers?: Record<string, string>;
   usernameOptions?: FindUsernamesOptions;
 } & (
-  | { errorType: ErrorType.STATUS_CODE; errorBody?: never }
-  | { errorType: ErrorType.RESPONSE_BODY; errorBody: string | string[] }
+  | { errorType: ErrorType.STATUS_CODE; errorBody?: never; errorUrl?: never }
+  | {
+      errorType: ErrorType.RESPONSE_BODY;
+      errorBody: string | string[];
+      errorUrl?: never;
+    }
+  | { errorType: ErrorType.RESPONSE_URL; errorBody?: never; errorUrl?: string }
 ) &
   (
     | { findNames: true; nameSelector?: string }
@@ -81,7 +87,7 @@ export default class Website {
         if (response?.status === 408) continue;
 
         if (!response?.ok) {
-          if (json.requestInterval)
+          if (json.requestInterval && !options.proxy)
             await new Promise((resolve) =>
               setTimeout(resolve, json.requestInterval)
             );
@@ -92,13 +98,15 @@ export default class Website {
         const html = await response.text();
 
         if (
-          json.errorType === ErrorType.RESPONSE_BODY &&
-          ((typeof json.errorBody === "string" &&
-            html.includes(json.errorBody)) ||
-            (Array.isArray(json.errorBody) &&
-              json.errorBody.some((body) => html.includes(body))))
+          (json.errorType === ErrorType.RESPONSE_BODY &&
+            ((typeof json.errorBody === "string" &&
+              html.includes(json.errorBody)) ||
+              (Array.isArray(json.errorBody) &&
+                json.errorBody.some((body) => html.includes(body))))) ||
+          (json.errorType === ErrorType.RESPONSE_URL &&
+            response.url === json.errorUrl)
         ) {
-          if (json.requestInterval)
+          if (json.requestInterval && !options.proxy)
             await new Promise((resolve) =>
               setTimeout(resolve, json.requestInterval)
             );
@@ -166,7 +174,7 @@ export default class Website {
         results.push(result);
         if (options.verbose) result.log();
 
-        if (json.requestInterval)
+        if (json.requestInterval && !options.proxy)
           await new Promise((resolve) =>
             setTimeout(resolve, json.requestInterval)
           );

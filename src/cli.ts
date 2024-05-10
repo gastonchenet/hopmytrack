@@ -26,6 +26,7 @@ const message =
 function handleResult(result: Result) {
   if (interval) clearInterval(interval);
   process.stdout.write("\r\x1b[K\u001B[?25h");
+  if (options.verbose) console.log();
   logger.writeResult(result);
 
   if (options.output) {

@@ -525,6 +525,12 @@ export default class Result {
         lines.push(
           `${colored ? chalk.black("[") : "["}${website.title}${
             colored ? chalk.black("]") : "]"
+          }${
+            website.nsfw
+              ? ` ${colored ? chalk.black("(") : "("}${
+                  colored ? chalk.red("!") : "!"
+                }${colored ? chalk.black(")") : ")"}`
+              : ""
           } ${
             colored ? chalk.cyan(chalk.underline(website.url)) : website.url
           } ${

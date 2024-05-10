@@ -50,4 +50,6 @@ if (options.help) {
   process.exit(0);
 }
 
-lookup({ username: "du_cassoulet" });
+lookup({
+  username: "wonderhunter",
+});
