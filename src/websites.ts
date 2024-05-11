@@ -263,4 +263,102 @@ export default Object.freeze([
     regex:
       /(?:https?:\/\/)?(?:www\.)?kick\.com\/(?<username>(?![_.-])[a-zA-Z0-9_-]{3,30}(?<![_-]))/gi,
   },
+  {
+    title: "eBay",
+    id: "ebay",
+    fetchFunction: "websites/ebay.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?ebay\.com\/usr\/(?<username>(?![_.-])[a-zA-Z0-9._-]{6,64}(?<![_-]))/gi,
+  },
+  {
+    title: "MCName",
+    id: "mcname",
+    fetchFunction: "websites/mcname.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?mcname\.info\/en\/search\?q=(?<username>[a-zA-Z0-9][a-zA-Z0-9_]{1,14}[a-zA-Z0-9])/gi,
+  },
+  {
+    title: "YouTube",
+    id: "youtube",
+    fetchFunction: "websites/youtube.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:(?:c\/|channel\/|user\/)|)(?<username>[a-zA-Z0-9_-]{1,256})/gi,
+  },
+  {
+    title: "Vimeo",
+    id: "vimeo",
+    fetchFunction: "websites/vimeo.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(?<username>[a-zA-Z0-9][a-zA-Z0-9_-]{1,28}[a-zA-Z0-9])/gi,
+  },
+  {
+    title: "Slack",
+    id: "slack",
+    fetchFunction: "websites/slack.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?slack\.com\/(?<username>[a-z0-9][a-z0-9._]{1,19}[a-z0-9])/gi,
+  },
+  {
+    title: "GitLab",
+    id: "gitlab",
+    fetchFunction: "websites/gitlab.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?gitlab\.com\/(?<username>[a-zA-Z0-9_\-\.]{2,255})/gi,
+  },
+  {
+    title: "Product Hunt",
+    id: "producthunt",
+    fetchFunction: "websites/producthunt.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?producthunt\.com\/(?<username>[a-zA-Z0-9_]{1,20})/gi,
+  },
+  {
+    title: "Trello",
+    id: "trello",
+    fetchFunction: "websites/trello.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?trello\.com\/(?<username>[a-zA-Z0-9_\-]{1,100})/gi,
+  },
+  {
+    title: "Xbox Gamertag",
+    id: "xboxgamertag",
+    fetchFunction: "websites/xboxgamertag.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?xboxgamertag\.com\/search\/(?<username>[a-zA-Z0-9]{1,15})/gi,
+  },
+  {
+    title: "Lichess",
+    id: "lichess",
+    fetchFunction: "websites/lichess.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?lichess\.org\/@\/(?<username>[a-zA-Z0-9][a-zA-Z0-9_-]{1,19})/gi,
+  },
+  {
+    title: "Chess.com",
+    id: "chesscom",
+    fetchFunction: "websites/chesscom.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?chess\.com\/member\/(?<username>[a-zA-Z0-9][a-zA-Z0-9_]{2,19})/gi,
+  },
+  {
+    title: "Tetr.io",
+    id: "tetrio",
+    fetchFunction: "websites/tetrio.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?(?:ch\.)?tetr\.io\/u\/(?<username>[a-zA-Z0-9_]{3,15})/gi,
+  },
+  {
+    title: "Replit",
+    id: "replit",
+    fetchFunction: "websites/replit.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?replit\.com\/@(?<username>[a-zA-Z0-9_]{3,20})/gi,
+  },
+  {
+    title: "Erome",
+    id: "erome",
+    fetchFunction: "websites/erome.ts",
+    regex:
+      /(?:https?:\/\/)?(?:www\.)?erome\.com\/(?<username>[a-zA-Z0-9_]{3,20})/gi,
+  },
 ]);

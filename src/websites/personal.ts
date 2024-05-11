@@ -106,45 +106,59 @@ async function websiteData(
   }
 }
 
-export default new Website("personal", async (previousResult) => {
-  const usernames = makeUsernames(previousResult, {
-    regex: /^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.[a-zA-Z]{2,})*$/g,
-  });
+export default new Website(
+  "personal",
+  "Personal Website",
+  Website.Type.PERSONAL,
+  false,
+  [
+    Website.Actions.PAGE_NAMES,
+    Website.Actions.PAGE_LOCATIONS,
+    Website.Actions.PAGE_EMAILS,
+    Website.Actions.PAGE_PHONES,
+    Website.Actions.PAGE_URLS,
+  ],
+  async (previousResult) => {
+    const usernames = makeUsernames(previousResult, {
+      regex: /^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.[a-zA-Z]{2,})*$/g,
+    });
 
-  const results: Result[][] = await Promise.all(
-    domains.map(async (domain) => {
-      const results = await Promise.all(
-        usernames.map(async (username) => {
-          const requestUrl = `https://${username.value}.${domain}`;
+    const results: Result[][] = await Promise.all(
+      domains.map(async (domain) => {
+        const results = await Promise.all(
+          usernames.map(async (username) => {
+            const requestUrl = `https://${username.value}.${domain}`;
 
-          const response = await fetch(requestUrl, {
-            abortIfCached: true,
-            headers: Website.DEFAULT_HEADERS,
-          });
+            const response = await fetch(requestUrl, {
+              abortIfCached: true,
+              headers: Website.DEFAULT_HEADERS,
+            });
 
-          if (!response?.ok) return null;
-          const html = await response.text();
+            if (!response?.ok) return null;
+            const html = await response.text();
 
-          const result = new Result({
-            id: "personal",
-            title: "Personal Website",
-            url: requestUrl,
-            username: username.value,
-            fetched: true,
-            parent: previousResult,
-            prob: username.prob,
-          });
+            const result = new Result({
+              id: "personal",
+              type: Website.Type.PERSONAL,
+              title: "Personal Website",
+              url: requestUrl,
+              username: username.value,
+              fetched: true,
+              parent: previousResult,
+              prob: username.prob,
+            });
 
-          await websiteData(result, requestUrl, html);
-          if (options.verbose) result.log();
+            await websiteData(result, requestUrl, html);
+            if (options.verbose) result.log();
 
-          return result;
-        })
-      );
+            return result;
+          })
+        );
 
-      return results.filter((result) => !!result) as Result[];
-    })
-  );
+        return results.filter((result) => !!result) as Result[];
+      })
+    );
 
-  return results.flat();
-});
+    return results.flat();
+  }
+);

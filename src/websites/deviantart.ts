@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("deviantart", {
   title: "DeviantArt",
+  type: Website.Type.ART,
   requestUrl: "https://{username}.deviantart.com/about",
   responseUrl: "https://{username}.deviantart.com",
   errorType: Website.ErrorType.STATUS_CODE,

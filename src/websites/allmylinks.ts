@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("allmylinks", {
   title: "AllMyLinks",
+  type: Website.Type.PERSONAL,
   requestUrl: "https://allmylinks.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

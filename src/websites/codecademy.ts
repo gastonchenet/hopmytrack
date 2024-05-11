@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("codecademy", {
   title: "Codecademy",
+  type: Website.Type.PROFESSIONAL,
   requestUrl: "https://codecademy.com/profiles/{username}",
   errorType: Website.ErrorType.RESPONSE_BODY,
   errorBody: "UserNotFound",

@@ -1,13 +1,13 @@
 import Website from "../structures/Website";
 
-export default Website.fromJSON("behance", {
-  title: "Behance",
+export default Website.fromJSON("slack", {
+  title: "Slack",
   type: Website.Type.PROFESSIONAL,
-  requestUrl: "https://behance.net/{username}",
+  requestUrl: "https://{username}.slack.com/",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
-  requestInterval: 1000,
+  requestInterval: 500,
   usernameOptions: {
-    regex: /^[a-zA-Z0-9_-]{3,20}$/,
+    regex: /^[a-z0-9][a-z0-9._]{1,19}[a-z0-9]$/,
   },
 });

@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("spotify", {
   title: "Spotify",
+  type: Website.Type.MUSIC,
   requestUrl: "https://open.spotify.com/user/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

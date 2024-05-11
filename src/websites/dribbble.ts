@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("dribbble", {
   title: "Dribbble",
+  type: Website.Type.PROFESSIONAL,
   requestUrl: "https://dribbble.com/{username}/about",
   responseUrl: "https://dribbble.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,

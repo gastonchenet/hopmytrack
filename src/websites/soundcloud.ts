@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("soundcloud", {
   title: "SoundCloud",
+  type: Website.Type.MUSIC,
   requestUrl: "https://soundcloud.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

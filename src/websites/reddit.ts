@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("reddit", {
   title: "Reddit",
+  type: Website.Type.BLOG,
   requestUrl: "https://reddit.com/user/{username}",
   errorType: Website.ErrorType.RESPONSE_BODY,
   errorBody: [

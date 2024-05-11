@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("codepen", {
   title: "CodePen",
+  type: Website.Type.DEVELOPMENT,
   requestUrl: "https://codepen.io/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

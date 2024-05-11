@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("wattpad", {
   title: "Wattpad",
+  type: Website.Type.ART,
   requestUrl: "https://wattpad.com/api/v3/users/{username}",
   responseUrl: "https://wattpad.com/user/{username}",
   errorType: Website.ErrorType.STATUS_CODE,

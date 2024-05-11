@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("lastfm", {
   title: "Last.fm",
+  type: Website.Type.MUSIC,
   requestUrl: "https://last.fm/user/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

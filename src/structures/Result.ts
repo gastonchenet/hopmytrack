@@ -8,6 +8,7 @@ import logger from "../util/logger";
 import options, { allowed } from "../options";
 import { getPhone } from "../util/findPhones";
 import { getGender } from "../util/findNames";
+import type { Type } from "./Website";
 
 export enum Gender {
   MALE,
@@ -66,6 +67,7 @@ enum Prob {
 type ResultOptions = {
   id: string;
   title: string;
+  type?: Type;
   prob: number;
   username?: string;
   url?: string;
@@ -152,6 +154,7 @@ export default class Result {
 
   public id: string;
   public title: string;
+  public type: Type | null;
   public url: string | null;
   public nsfw: boolean;
   public parent: Result | null;
@@ -168,6 +171,7 @@ export default class Result {
   public constructor(options: ResultOptions) {
     this.id = options.id;
     this.title = options.title;
+    this.type = options.type ?? null;
     this.url = options.url ?? null;
     this.nsfw = options.nsfw ?? false;
     this.parent = options.parent ?? null;
@@ -261,6 +265,24 @@ export default class Result {
     return this.phones.find((phone) => phone.prob === Prob.SURE)?.value ?? null;
   }
 
+  private get likelyLocation(): ProbValue<Location> | null {
+    const sorted = this.locations.sort((a, b) => b.prob - a.prob);
+    if (sorted.length === 0) return null;
+
+    let result = sorted[0];
+
+    if (!result.city) {
+      for (const location of sorted) {
+        if (location.city && location.country === result.country) {
+          result = location;
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
   public get likely(): LikelyResult {
     return {
       usernames: this.usernames.filter(
@@ -274,7 +296,7 @@ export default class Result {
         this.lastNames
           .filter((n) => !n.new)
           .sort((a, b) => b.prob - a.prob)[0] ?? null,
-      location: this.locations.sort((a, b) => b.prob - a.prob)[0] ?? null,
+      location: this.likelyLocation,
       emails: this.emails.filter((u) => u.prob >= Prob.LIKELY),
       phone: this.phones.sort((a, b) => b.prob - a.prob)[0] ?? null,
       urls: this.urls
@@ -687,10 +709,10 @@ export default class Result {
   }
 
   public addUrl(result: Result) {
-    if (!allowed(result.id)) return;
+    if (!allowed(result.id, result.type!)) return;
 
     const existing = this.getUrl(result.url!);
-    result.username!.prob = (result.prob * this.prob + result.prob) / 2;
+    result.username!.prob = (result.prob * this.prob + this.prob) / 2;
 
     if (existing) {
       result.username!.prob =

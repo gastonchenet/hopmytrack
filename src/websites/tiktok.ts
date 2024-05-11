@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("tiktok", {
   title: "TikTok",
+  type: Website.Type.SOCIAL,
   requestUrl: "https://tikleap.com/profile/{username}",
   responseUrl: "https://tiktok.com/@{username}",
   errorType: Website.ErrorType.STATUS_CODE,

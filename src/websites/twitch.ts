@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("twitch", {
   title: "Twitch",
+  type: Website.Type.VIDEO,
   requestUrl: "https://m.twitch.tv/{username}",
   responseUrl: "https://twitch.tv/{username}",
   errorType: Website.ErrorType.STATUS_CODE,

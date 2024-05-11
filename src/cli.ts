@@ -1,110 +1,102 @@
-import Result, { type SearchData } from "./structures/Result";
-import websites from "./websites";
-import fs from "fs";
-import path from "path";
-import Website from "./structures/Website";
+import lookup from "./lookup";
+import tool from "../tool.json";
+import options, { optionList } from "./options";
 import logger from "./util/logger";
+import path from "path";
+import fs from "fs";
+import type Website from "./structures/Website";
 import chalk from "chalk";
-import options, { allowed } from "./options";
 
-const SPINNER_CHARS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-
-const FETCHING_MESSAGES = [
-  "Sniffin' the web for you",
-  "Sending my gobelins to fetch the data",
-  "Looking for the data in the dark web",
-  "Hacking the mainframe",
-  "Entering the matrix",
-  "Searching for the data in the deep web",
-];
-
-let interval: Timer | null = null;
-
-const message =
-  FETCHING_MESSAGES[Math.floor(Math.random() * FETCHING_MESSAGES.length)];
-
-function handleResult(result: Result) {
-  if (interval) clearInterval(interval);
+process.on("unhandledRejection", (reason) => {
   process.stdout.write("\r\x1b[K\u001B[?25h");
-  if (options.verbose) console.log();
-  logger.writeResult(result);
+  logger.error(reason as Error);
+  process.exit(1);
+});
 
-  if (options.output) {
-    const outFile = path.join(process.cwd(), options.output);
-    const outDir = path.dirname(outFile);
+process.on("uncaughtException", (error) => {
+  process.stdout.write("\r\x1b[K\u001B[?25h");
+  logger.error(error as Error);
+  process.exit(1);
+});
 
-    if (!fs.existsSync(outDir)) {
-      fs.mkdirSync(outDir, { recursive: true });
-    }
+process.on("SIGINT", function () {
+  process.stdout.write("\r\x1b[K\u001B[?25h");
+  logger.log("Caught interrupt signal, exiting...");
+  process.exit(1);
+});
 
-    fs.writeFileSync(outFile, result.toString());
-
-    if (options.verbose) {
-      logger.log(
-        !options["no-color"]
-          ? chalk.green(`Data successfully written to '${outFile}'`)
-          : `Data successfully written to '${outFile}'`
-      );
-    }
-  }
+if (options.version) {
+  console.log(tool.version);
+  process.exit(0);
 }
 
-async function recursion(result: Result, iteration = 0) {
-  if (!options.verbose && iteration === 0) {
-    interval = setInterval(() => {
-      process.stdout.write(
-        `${
-          !options["no-color"]
-            ? chalk.cyan(SPINNER_CHARS[Math.floor(Date.now() / 100) % 10])
-            : SPINNER_CHARS[Math.floor(Date.now() / 100) % 10]
-        } ${message}...\u001B[?25l\r`
-      );
-    }, 100);
-  }
+if (options.help) {
+  console.log("Options:");
 
-  if (options.depth !== null && iteration >= options.depth) {
-    handleResult(result);
-    return;
-  }
+  const largestName = Math.max(
+    ...Object.keys(optionList).map((name) => name.length)
+  );
 
-  if (options.verbose) {
-    logger.log(
-      `Recursion ${
-        !options["no-color"] ? chalk.cyan(iteration + 1) : iteration + 1
-      }${!options["no-color"] ? chalk.black("/") : "/"}${
-        !options["no-color"]
-          ? chalk.cyan(options.depth ?? "∞")
-          : options.depth ?? "Inf"
-      }`
+  const largestUsage = Math.max(
+    ...Object.values(optionList).map((option) => option.usage.length)
+  );
+
+  for (const [name, option] of Object.entries(optionList).sort((a, b) =>
+    a[0].localeCompare(b[0])
+  )) {
+    console.log(
+      `  ${name.padEnd(largestName + 3)} -${
+        option.alias
+      }, ${option.usage.padEnd(largestUsage + 3)} ${option.description}`
     );
   }
 
-  const previousResult = result.copy();
+  process.exit(0);
+}
 
-  await Promise.all(
-    websites.map(async (w) => {
-      if (!w.fetchFunction) return [];
+if (options.info) {
+  const websites: Website[] = fs
+    .readdirSync(path.join(__dirname, "websites"))
+    .map((file) => {
+      return require(path.join(__dirname, "websites", file)).default;
+    });
 
-      const website: Website = require(path.join(
-        __dirname,
-        w.fetchFunction
-      )).default;
-
-      if (!allowed(website.id)) return [];
-      await website.execute(result);
-    })
+  const website = websites.find(
+    (website) =>
+      website.id === options.info.toLowerCase() ||
+      website.title.toLowerCase().replace(/[^a-z0-9]/g, "") ===
+        options.info.toLowerCase().replace(/[^a-z0-9]/g, "")
   );
 
-  result.nextTurn();
-  if (previousResult.equals(result)) {
-    handleResult(result);
-    return;
+  const typeWebsites = websites.filter(
+    (website) => website.type.toLowerCase() === options.info.toLowerCase()
+  );
+
+  if (!website && typeWebsites.length === 0) {
+    logger.error(`Website '${options.info}' not found.`);
+    process.exit(1);
   }
 
-  recursion(result, iteration + 1);
+  if (website) {
+    console.log(website.toString());
+  }
+
+  if (typeWebsites.length > 0) {
+    console.log(
+      `Websites of type ${chalk.cyan(
+        chalk.italic(options.info.toUpperCase())
+      )}${chalk.black(":")}\n${typeWebsites
+        .map(
+          (w) =>
+            `${chalk.black("-")} ${w.title} ${chalk.black(`(id: ${w.id})`)}`
+        )
+        .join("\n")}`
+    );
+  }
+
+  process.exit(0);
 }
 
-export default async function lookup(searchData: SearchData) {
-  const result = await Result.fromSearchData(searchData);
-  recursion(result);
-}
+lookup({
+  username: "thomas",
+});

@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("pornhub", {
   title: "Pornhub",
+  type: Website.Type.VIDEO,
   nsfw: true,
   requestUrl: "https://pornhub.com/users/{username}",
   errorType: Website.ErrorType.RESPONSE_BODY,

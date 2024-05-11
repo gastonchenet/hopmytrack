@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("github", {
   title: "GitHub",
+  type: Website.Type.DEVELOPMENT,
   requestUrl: "https://github.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

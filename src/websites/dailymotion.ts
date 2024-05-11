@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("dailymotion", {
   title: "Dailymotion",
+  type: Website.Type.VIDEO,
   requestUrl: "https://dailymotion.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

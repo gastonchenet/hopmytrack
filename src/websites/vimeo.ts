@@ -1,14 +1,13 @@
 import Website from "../structures/Website";
 
-export default Website.fromJSON("xhamster", {
-  title: "Xhamster",
+export default Website.fromJSON("vimeo", {
+  title: "Vimeo",
   type: Website.Type.VIDEO,
-  nsfw: true,
-  requestUrl: "https://xhamster.com/users/{username}",
+  requestUrl: "https://vimeo.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
   requestInterval: 500,
   usernameOptions: {
-    regex: /^[a-zA-Z0-9][a-zA-Z0-9._-]{4,}[a-zA-Z0-9]$/,
+    regex: /^(?![_.-])[a-zA-Z0-9][a-zA-Z0-9_-]{1,28}[a-zA-Z0-9]$/,
   },
 });

@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("twitter", {
   title: "Twitter",
+  type: Website.Type.SOCIAL,
   requestUrl: "https://nitter.privacydev.net/{username}",
   responseUrl: "https://twitter.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,

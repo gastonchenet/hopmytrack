@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("flickr", {
   title: "Flickr",
+  type: Website.Type.ART,
   requestUrl: "https://www.flickr.com/people/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

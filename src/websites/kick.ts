@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("kick", {
   title: "Kick",
+  type: Website.Type.VIDEO,
   requestUrl: "https://kick.com/api/v2/channels/{username}",
   responseUrl: "https://kick.com/{username}",
   errorType: Website.ErrorType.RESPONSE_BODY,

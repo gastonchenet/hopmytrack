@@ -11,7 +11,7 @@ const cache = new Set<string>();
 export default function fetch(
   url: string,
   options: FetchOptions = {}
-): Promise<Response | null> {
+): Promise<Response> {
   return new Promise((resolve) => {
     if (options.abortIfCached && cache.has(url)) {
       resolve(new Response(null, { status: 408 }));
@@ -39,7 +39,7 @@ export default function fetch(
         }
 
         clearTimeout(timer);
-        resolve(null);
+        resolve(new Response(null, { status: 500 }));
       });
   });
 }

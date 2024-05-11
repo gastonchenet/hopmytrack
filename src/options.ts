@@ -1,6 +1,7 @@
 import parseArgs, { OptionPayloadType } from "./parseArgs";
 import fs from "fs";
 import path from "path";
+import type { Type } from "./structures/Website";
 
 export const optionList = {
   help: {
@@ -91,12 +92,12 @@ export const optionList = {
     usage: "--blacklist-file=<file>",
     default: null,
   },
-  input: {
+  info: {
     alias: "i",
-    unique: false,
+    unique: true,
     type: OptionPayloadType.STRING,
-    description: "Input file.",
-    usage: "--input=<file>",
+    description: "Information about a website.",
+    usage: "--input=<website|type>",
     default: null,
   },
   proxy: {
@@ -126,10 +127,17 @@ if (options["blacklist-file"]) {
   blacklist.push(...data.split(/\r?\n/).map((line) => line.trim()));
 }
 
-function allowed(website: string) {
-  if (website === "root") return true;
-  if (whitelist.length > 0 && !whitelist.includes(website)) return false;
-  if (blacklist.includes(website)) return false;
+function allowed(id: string, type: Type) {
+  if (id === "root") return true;
+
+  if (
+    whitelist.length > 0 &&
+    !whitelist.includes(id) &&
+    !whitelist.includes(type)
+  )
+    return false;
+
+  if (blacklist.includes(id) || blacklist.includes(type)) return false;
 
   return true;
 }

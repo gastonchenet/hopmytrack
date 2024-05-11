@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("steam", {
   title: "Steam",
+  type: Website.Type.GAMING,
   requestUrl: "https://steamcommunity.com/id/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,

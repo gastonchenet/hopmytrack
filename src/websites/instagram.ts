@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("instagram", {
   title: "Instagram",
+  type: Website.Type.SOCIAL,
   requestUrl: "https://picuki.com/profile/{username}",
   responseUrl: "https://instagram.com/{username}",
   errorType: Website.ErrorType.STATUS_CODE,

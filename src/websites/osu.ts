@@ -2,6 +2,7 @@ import Website from "../structures/Website";
 
 export default Website.fromJSON("osu", {
   title: "osu!",
+  type: Website.Type.GAMING,
   requestUrl: "https://osu.ppy.sh/users/{username}",
   errorType: Website.ErrorType.STATUS_CODE,
   headers: Website.DEFAULT_HEADERS,
