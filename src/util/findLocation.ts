@@ -4,6 +4,21 @@ import findInPage from "./findInPage";
 import { detect } from "country-in-text-detector";
 import unobfuscate from "./unobfuscate";
 
+function removeDuplicateCountries(probs: ProbValue<Location>[]) {
+  const uniqueCountries = [...new Set(probs.map((p) => p.country))];
+  const newProbs: ProbValue<Location>[] = [];
+
+  for (const country of uniqueCountries) {
+    const countryProbs = probs.filter((p) => p.country === country);
+    const maxProb = Math.max(...countryProbs.map((p) => p.prob));
+
+    const bestProb = countryProbs.find((p) => p.prob === maxProb);
+    if (bestProb) newProbs.push(bestProb);
+  }
+
+  return newProbs;
+}
+
 export function parseLocation(location: Location): string {
   return location.city
     ? `${location.city.toLowerCase()}, ${location.country.toLowerCase()}`
@@ -33,36 +48,38 @@ export default function findLocation(
   html = unobfuscate(html.toLowerCase());
   if (selector) html = findInPage(html, selector.toLowerCase());
 
-  const locations: ProbValue<Location>[] = [];
   const matches = detect(html);
 
-  const locationCounts: { [key: string]: number } = {};
-
-  matches.forEach((match) => {
-    const { type, name, countryName } = match;
-    const city = type === "city" ? name : undefined;
-    const country = type === "country" ? name : countryName;
-
-    if (country) {
-      const locationKey = city ? `${country}, ${city}` : country;
-      locationCounts[locationKey] = (locationCounts[locationKey] || 0) + 1;
+  const locationMatches = matches.map((match) => {
+    if (match.type === "city") {
+      return { city: match.name, country: match.countryName };
     }
+
+    return { country: match.name };
   });
 
-  const totalOccurrences = Object.values(locationCounts).reduce(
-    (sum, count) => sum + count,
-    0
-  );
+  const probs: ProbValue<Location>[] = locationMatches.map((location) => {
+    const countryCount = locationMatches.filter(
+      (l) => l.country === location.country && !l.city
+    ).length;
 
-  Object.entries(locationCounts).forEach(([locationKey, count]) => {
-    const [country, city] = locationKey.split("-");
-    const prob = (count / totalOccurrences) * Result.Prob.LIKELY;
+    if (!location.city)
+      return {
+        ...location,
+        prob: (countryCount / locationMatches.length) * Result.Prob.LIKELY,
+        new: true,
+      };
 
-    const location: Location = { country: country.toLowerCase() };
-    if (city) location.city = city.toLowerCase();
+    const cityCount = locationMatches.filter(
+      (l) => l.city === location.city && l.country === location.country
+    ).length;
 
-    locations.push({ ...location, prob });
+    return {
+      ...location,
+      prob: (cityCount / countryCount) * Result.Prob.LIKELY,
+      new: true,
+    };
   });
 
-  return locations;
+  return removeDuplicateCountries(probs);
 }

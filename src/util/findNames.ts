@@ -13,7 +13,7 @@ const REGEX = new RegExp(
 );
 
 export function nameComplexity(name: string) {
-  return Math.max(0, name.length / (name.length + 1) - 0.5) * 2;
+  return name.length / (name.length + 1);
 }
 
 export function getGender(firstName: string) {
@@ -62,14 +62,16 @@ export default function findNames(
   for (const [firstName, count] of Object.entries(firstNameCounts)) {
     firstNames.push({
       value: firstName,
-      prob: (count / maxFirstNameCount) * Result.Prob.LIKELY,
+      prob: count / maxFirstNameCount,
+      new: true,
     });
   }
 
   for (const [lastName, count] of Object.entries(lastNameCounts)) {
     lastNames.push({
       value: lastName,
-      prob: (count / maxLastNameCount) * Result.Prob.LIKELY,
+      prob: count / maxLastNameCount,
+      new: true,
     });
   }
 

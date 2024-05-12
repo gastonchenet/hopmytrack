@@ -72,25 +72,20 @@ async function websiteData(
     ...blacklistedLinks,
   ]);
 
-  firstNames.forEach((firstName) => {
-    result.addFirstName(firstName.value, firstName.prob);
-  });
+  firstNames.forEach((firstName) =>
+    result.addFirstName(firstName.value, firstName.prob)
+  );
 
-  lastNames.forEach((lastName) => {
-    result.addLastName(lastName.value, lastName.prob);
-  });
+  lastNames.forEach((lastName) =>
+    result.addLastName(lastName.value, lastName.prob)
+  );
 
   for (const email of emails) {
     await result.addEmail(email.value, email.prob);
   }
 
-  phones.forEach((phone) => {
-    result.addPhone(phone, phone.prob);
-  });
-
-  urls.forEach((url) => {
-    result.addUrl(url);
-  });
+  phones.forEach((phone) => result.addPhone(phone, phone.prob));
+  urls.forEach((url) => result.addUrl(url));
 
   const childrenUrls = getURLFromHref(url, html);
 
@@ -98,6 +93,7 @@ async function websiteData(
     const response = await fetch(url, {
       abortIfCached: true,
       headers: Website.DEFAULT_HEADERS,
+      proxy: options.proxy,
     });
 
     if (!response?.ok) return;
@@ -132,6 +128,7 @@ export default new Website(
             const response = await fetch(requestUrl, {
               abortIfCached: true,
               headers: Website.DEFAULT_HEADERS,
+              proxy: options.proxy,
             });
 
             if (!response?.ok) return null;
@@ -149,7 +146,6 @@ export default new Website(
             });
 
             await websiteData(result, requestUrl, html);
-            if (options.verbose) result.log();
 
             return result;
           })

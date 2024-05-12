@@ -96,6 +96,7 @@ async function recursion(result: Result, iteration = 0) {
   );
 
   result.nextTurn();
+
   if (previousResult.equals(result)) {
     handleResult(result);
     return;

@@ -98,5 +98,8 @@ if (options.info) {
 }
 
 lookup({
-  username: "thomas",
+  usernames: ["du_cassoulet", "gastonchenet"],
+  firstName: "Gaston",
+  lastName: "Chenet",
+  location: { country: "France", city: "Paris" },
 });

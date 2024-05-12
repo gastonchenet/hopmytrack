@@ -7,8 +7,9 @@ import { getLocation, parseLocation } from "../util/findLocation";
 import logger from "../util/logger";
 import options, { allowed } from "../options";
 import { getPhone } from "../util/findPhones";
-import { getGender } from "../util/findNames";
-import type { Type } from "./Website";
+import { getGender, nameComplexity } from "../util/findNames";
+import { Type } from "./Website";
+import unobfuscate from "../util/unobfuscate";
 
 export enum Gender {
   MALE,
@@ -42,7 +43,7 @@ export type FirstName = {
 export type SearchData = {
   firstName?: string;
   lastName?: string;
-  location?: string;
+  location?: string | Location;
   phone?: string;
 } & (
   | { username?: string; usernames?: never }
@@ -67,13 +68,21 @@ enum Prob {
 type ResultOptions = {
   id: string;
   title: string;
-  type?: Type;
-  prob: number;
+  type?: Type | null;
+  prob?: number;
   username?: string;
-  url?: string;
+  url?: string | null;
   nsfw?: boolean;
-  parent?: Result;
+  parent?: Result | null;
   fetched?: boolean;
+  usernames?: ProbValue<string>[];
+  firstNames?: ProbValue<FirstName>[];
+  lastNames?: ProbValue<string>[];
+  locations?: ProbValue<Location>[];
+  emails?: ProbValue<Email>[];
+  phones?: ProbValue<Phone>[];
+  urls?: Result[];
+  copy?: boolean;
 };
 
 type URLResult = {
@@ -113,7 +122,8 @@ export default class Result {
   public static Prob = Prob;
   public static LogType = LogType;
 
-  private static stackProbs<T>(values: ProbValue<T>[]): number | undefined {
+  private static stackProbs<T>(values: ProbValue<T>[]): number | null {
+    if (values.length === 0) return null;
     return values.reduce((acc, val) => acc + val.prob, 0) / values.length;
   }
 
@@ -121,31 +131,91 @@ export default class Result {
     const result = new Result({
       id: "root",
       title: "Root",
-      prob: Prob.SURE,
       fetched: true,
     });
 
-    if ("username" in data && data.username) {
-      result.addUsername(data.username, Prob.SURE);
-    } else if ("usernames" in data && data.usernames) {
-      for (const username of data.usernames) {
-        result.addUsername(username, Prob.SURE);
-      }
+    if (data.username) {
+      result.usernames.push({
+        value: data.username?.toLowerCase().trim(),
+        prob: usernameComplexity(data.username),
+        new: true,
+      });
+    } else if (data.usernames) {
+      result.usernames.push(
+        ...data.usernames.map((u) => ({
+          value: u?.toLowerCase().trim(),
+          prob: usernameComplexity(u),
+          new: true,
+        }))
+      );
     }
 
-    if ("email" in data && data.email) {
-      await result.addEmail(data.email, Prob.SURE);
-    } else if ("emails" in data && data.emails) {
+    if (data.email) {
+      const verified = await verifyEmail(data.email);
+
+      result.emails.push({
+        value: data.email?.toLowerCase().trim(),
+        prob: verified ? Prob.SURE : Prob.LIKELY,
+        new: true,
+        verified,
+      });
+    } else if (data.emails) {
       for (const email of data.emails) {
-        await result.addEmail(email, Prob.SURE);
+        const verified = await verifyEmail(email);
+
+        result.emails.push({
+          value: email?.toLowerCase().trim(),
+          prob: verified ? Prob.SURE : Prob.LIKELY,
+          new: true,
+          verified,
+        });
       }
     }
 
-    if (data.firstName) result.addFirstName(data.firstName, Prob.SURE);
-    if (data.lastName) result.addLastName(data.lastName, Prob.SURE);
-    if (data.phone) result.addPhone(getPhone(data.phone)!, Prob.SURE);
-    if (data.location)
-      result.addLocation(getLocation(data.location), Prob.SURE);
+    if (data.firstName) {
+      result.firstNames.push({
+        value: data.firstName?.toLowerCase().trim(),
+        prob: Prob.SURE,
+        new: true,
+      });
+    }
+
+    if (data.lastName) {
+      result.lastNames.push({
+        value: data.lastName?.toLowerCase().trim(),
+        prob: Prob.SURE,
+        new: true,
+      });
+    }
+
+    let location: Location | null = null;
+
+    if (data.location && typeof data.location === "string") {
+      location = getLocation(data.location?.toLowerCase().trim());
+    } else if (data.location) {
+      location = data.location as Location;
+    }
+
+    if (location) {
+      result.locations.push({
+        country: location.country?.toLowerCase().trim(),
+        city: location.city?.toLowerCase().trim(),
+        prob: Prob.SURE,
+        new: true,
+      });
+    }
+
+    if (data.phone) {
+      const phone = getPhone(data.phone);
+
+      if (phone) {
+        result.phones.push({
+          ...phone,
+          prob: Prob.SURE,
+          new: true,
+        });
+      }
+    }
 
     result.nextTurn();
 
@@ -177,12 +247,34 @@ export default class Result {
     this.parent = options.parent ?? null;
     this.fetched = options.fetched ?? false;
 
-    if (options.username) this.addUsername(options.username, options.prob);
-    if (this.parent) this.parent.urls.push(this);
+    if (options.usernames) this.usernames = options.usernames;
+    if (options.firstNames) this.firstNames = options.firstNames;
+    if (options.lastNames) this.lastNames = options.lastNames;
+    if (options.locations) this.locations = options.locations;
+    if (options.emails) this.emails = options.emails;
+    if (options.phones) this.phones = options.phones;
+    if (options.urls) this.urls = options.urls;
+
+    if (options.username && options.prob)
+      this.usernames.push({
+        value: options.username,
+        prob: options.prob * usernameComplexity(options.username),
+        new: true,
+      });
+
+    if (this.parent && !options.copy) this.parent.addUrl(this);
+  }
+
+  public get isRoot(): boolean {
+    return this.id === "root";
   }
 
   public get root(): Result {
-    return this.parent ? this.parent.root : this;
+    return this.isRoot ? this : this.parent!.root;
+  }
+
+  public get new(): boolean {
+    return this.usernames.some((u) => u.new);
   }
 
   public get username(): ProbValue<string> | null {
@@ -198,45 +290,24 @@ export default class Result {
   }
 
   public get prob(): number {
-    if (this.id === "root") return Prob.SURE;
+    if (this.isRoot) return Prob.SURE;
+    let prob = Result.stackProbs(
+      this.usernames.filter((u) => u.prob >= this.username!.prob)
+    )!;
 
-    let prob = this.username?.prob;
-
-    if (this.hasInfoInUsername(this.firstNames)) {
-      if (prob === undefined) {
-        prob = Result.stackProbs(this.firstNames);
-      } else if (this.firstNames.length > 0) {
-        prob = (prob + Result.stackProbs(this.firstNames)! + Prob.SURE) / 3;
-      }
+    if (this.firstNames.length > 0) {
+      prob = Math.max(prob, (prob + Result.stackProbs(this.firstNames)!) / 2);
     }
 
-    if (this.hasInfoInUsername(this.lastNames)) {
-      if (prob === undefined) {
-        prob = Result.stackProbs(this.lastNames);
-      } else if (this.lastNames.length > 0) {
-        prob = (prob + Result.stackProbs(this.lastNames)! + Prob.SURE) / 3;
-      }
+    if (this.lastNames.length > 0) {
+      prob = Math.max(prob, (prob + Result.stackProbs(this.lastNames)!) / 2);
     }
 
-    if (prob === undefined) {
-      prob = Result.stackProbs(this.locations);
-    } else if (this.locations.length > 0) {
-      prob = (prob + Result.stackProbs(this.locations)! + Prob.SURE) / 3;
+    if (this.locations.length > 0) {
+      prob = Math.max(prob, (prob + Result.stackProbs(this.locations)!) / 2);
     }
 
-    if (prob === undefined) {
-      prob = Result.stackProbs(this.emails);
-    } else if (this.emails.length > 0) {
-      prob = (prob + Result.stackProbs(this.emails)! + Prob.SURE) / 3;
-    }
-
-    if (prob === undefined) {
-      prob = Result.stackProbs(this.phones);
-    } else if (this.phones.length > 0) {
-      prob = (prob + Result.stackProbs(this.phones)! + Prob.SURE) / 3;
-    }
-
-    return prob ?? Prob.NO;
+    return prob;
   }
 
   public get firstName(): string | null {
@@ -311,11 +382,6 @@ export default class Result {
     };
   }
 
-  private tracePath(): string {
-    if (!this.parent) return this.title;
-    return `${this.parent.tracePath()} > ${this.title}`;
-  }
-
   public equals(result: Result): boolean {
     if (this.title !== result.title) return false;
     if (this.url !== result.url) return false;
@@ -375,24 +441,23 @@ export default class Result {
   }
 
   public copy(): Result {
-    const result = new Result({
+    return new Result({
       id: this.id,
       title: this.title,
-      url: this.url ?? undefined,
+      type: this.type,
+      url: this.url,
       nsfw: this.nsfw,
       fetched: this.fetched,
-      prob: this.prob,
+      parent: this.parent,
+      usernames: this.usernames,
+      firstNames: this.firstNames,
+      lastNames: this.lastNames,
+      locations: this.locations,
+      emails: this.emails,
+      phones: this.phones,
+      urls: this.urls.map((url) => url.copy()),
+      copy: true,
     });
-
-    result.usernames = this.usernames.map((u) => ({ ...u }));
-    result.firstNames = this.firstNames.map((n) => ({ ...n }));
-    result.lastNames = this.lastNames.map((n) => ({ ...n }));
-    result.locations = this.locations.map((c) => ({ ...c }));
-    result.emails = this.emails.map((e) => ({ ...e }));
-    result.phones = this.phones.map((p) => ({ ...p }));
-    result.urls = this.urls.map((r) => r.copy());
-
-    return result;
   }
 
   public toJSON(): JSONResult {
@@ -412,10 +477,7 @@ export default class Result {
     };
   }
 
-  public log() {
-    const hasUrl = false; // this.findUrl(this);
-    const type = hasUrl ? LogType.UPDATE : LogType.ADD;
-
+  public log(type: LogType) {
     logger.log(
       `${!options["no-color"] ? chalk.black("(") : "("}${
         type === LogType.ADD
@@ -459,7 +521,18 @@ export default class Result {
           colored ? chalk.black("]") : "]"
         } ${likely.usernames
           .sort((a, b) => b.prob - a.prob)
-          .map((u) => (colored ? chalk.cyan(u.value) : u.value))
+          .map(
+            (u) =>
+              `${colored ? chalk.cyan(u.value) : u.value} ${
+                colored
+                  ? (u.prob >= Result.Prob.LIKELY
+                      ? chalk.green
+                      : u.prob >= Result.Prob.MAYBE
+                      ? chalk.yellow
+                      : chalk.red)(roundDecimal(u.prob * 100, 3))
+                  : roundDecimal(u.prob * 100, 3)
+              }${colored ? chalk.black("%") : "%"}`
+          )
           .join(colored ? chalk.black(", ") : ", ")}`
       );
     }
@@ -484,7 +557,15 @@ export default class Result {
                   : "Female"
               }${colored ? chalk.black(")") : ")"}`
             : ""
-        }`
+        } ${
+          colored
+            ? (likely.firstName.prob >= Result.Prob.LIKELY
+                ? chalk.green
+                : likely.firstName.prob >= Result.Prob.MAYBE
+                ? chalk.yellow
+                : chalk.red)(roundDecimal(likely.firstName.prob * 100, 3))
+            : roundDecimal(likely.firstName.prob * 100, 3)
+        }${colored ? chalk.black("%") : "%"}`
       );
     }
 
@@ -496,7 +577,35 @@ export default class Result {
           colored
             ? chalk.cyan(capitalize(likely.lastName.value, true))
             : capitalize(likely.lastName.value, true)
-        }`
+        } ${
+          colored
+            ? (likely.lastName.prob >= Result.Prob.LIKELY
+                ? chalk.green
+                : likely.lastName.prob >= Result.Prob.MAYBE
+                ? chalk.yellow
+                : chalk.red)(roundDecimal(likely.lastName.prob * 100, 3))
+            : roundDecimal(likely.lastName.prob * 100, 3)
+        }${colored ? chalk.black("%") : "%"}`
+      );
+    }
+
+    if (likely.location) {
+      lines.push(
+        `${colored ? chalk.black("[") : "["}Location${
+          colored ? chalk.black("]") : "]"
+        } ${
+          colored
+            ? chalk.cyan(capitalize(parseLocation(likely.location), true))
+            : capitalize(parseLocation(likely.location), true)
+        } ${
+          colored
+            ? (likely.location.prob >= Result.Prob.LIKELY
+                ? chalk.green
+                : likely.location.prob >= Result.Prob.MAYBE
+                ? chalk.yellow
+                : chalk.red)(roundDecimal(likely.location.prob * 100, 3))
+            : roundDecimal(likely.location.prob * 100, 3)
+        }${colored ? chalk.black("%") : "%"}`
       );
     }
 
@@ -525,18 +634,6 @@ export default class Result {
         `${colored ? chalk.black("[") : "["}Phone Number${
           colored ? chalk.black("]") : "]"
         } ${colored ? chalk.cyan(likely.phone.value) : likely.phone.value}`
-      );
-    }
-
-    if (likely.location) {
-      lines.push(
-        `${colored ? chalk.black("[") : "["}Location${
-          colored ? chalk.black("]") : "]"
-        } ${
-          colored
-            ? chalk.cyan(capitalize(parseLocation(likely.location), true))
-            : capitalize(parseLocation(likely.location), true)
-        }`
       );
     }
 
@@ -593,137 +690,171 @@ export default class Result {
     this.urls.forEach((url) => url.nextTurn());
   }
 
-  private getFirstName(firstName: string) {
-    return this.root.firstNames.find((n) => n.value === firstName);
-  }
-
-  private getLastName(lastName: string) {
-    return this.root.lastNames.find((n) => n.value === lastName);
-  }
-
-  private getCountry(location: Location) {
-    return this.root.locations.find((l) => l.country === location.country);
-  }
-
-  private getCity(location: Location) {
-    return this.root.locations.find((l) => l.city === location.city);
-  }
-
-  private getEmail(email: string) {
-    return this.root.emails.find((e) => e.value === email);
-  }
-
-  private getPhone(phone: Phone) {
-    return this.root.phones.find((p) => p.value === phone.value);
-  }
-
-  private getUrl(url: string) {
-    return this.root.urls.find((r) => r.url === url);
-  }
-
-  private addUsername(username: string, prob: number) {
-    username = username.trim().toLowerCase();
-    prob *= usernameComplexity(username);
-
-    const existing = this.usernames.find((u) => u.value === username);
-
-    if (existing) {
-      existing.prob = prob = Math.max(
-        existing.prob,
-        (prob + Prob.LIKELY) / 2,
-        prob
-      );
-    } else {
-      this.usernames.push({ value: username, prob, new: true });
-    }
-  }
-
-  public addFirstName(firstName: string, prob: number) {
-    firstName = firstName.trim().toLowerCase();
-    if (this.firstName !== firstName) prob = Prob.NO;
-    const existing = this.getFirstName(firstName);
-    const gender = getGender(firstName);
-
-    if (existing) {
-      existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
-    }
-
-    this.firstNames.push({ value: firstName, gender, prob, new: true });
-    this.parent?.addFirstName(firstName, prob);
-  }
-
-  public addLastName(lastName: string, prob: number) {
-    lastName = lastName.trim().toLowerCase();
-    if (this.lastName !== lastName) prob = Prob.NO;
-    const existing = this.getLastName(lastName);
-
-    if (existing) {
-      existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
-    }
-
-    this.lastNames.push({ value: lastName, prob, new: true });
-    this.parent?.addLastName(lastName, prob);
-  }
-
-  public addLocation(location: Location, prob: number) {
-    const country = this.getCountry(location);
-    const city = location.city ? this.getCity(location) : null;
-
-    if (country) {
-      country.prob = prob = (Math.max(country.prob, prob) + Prob.SURE) / 2;
-    }
-
-    if (city) {
-      city.prob = prob = (Math.max(city.prob, prob) + Prob.SURE) / 2;
-    }
-
-    this.locations.push({ ...location, prob, new: true });
-    this.parent?.addLocation(location, prob);
-  }
-
-  public async addEmail(email: string, prob: number) {
-    email = email.trim().toLowerCase();
-    const existing = this.getEmail(email);
-
-    if (existing) {
-      existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
-    } else {
-      const verified = await verifyEmail(email);
-      this.emails.push({ value: email, prob, verified, new: true });
-    }
-
-    this.parent?.addEmail(email, prob);
-  }
-
-  public addPhone(phone: Phone, prob: number) {
-    phone.value = phone.value.trim().toLowerCase();
-    phone.country = phone.country?.trim().toLowerCase();
-    const existing = this.getPhone(phone);
-
-    if (existing) {
-      existing.prob = prob = (Math.max(existing.prob, prob) + Prob.SURE) / 2;
-    }
-
-    this.phones.push({ ...phone, prob, new: true });
-    this.parent?.addPhone(phone, prob);
-  }
-
   public addUrl(result: Result) {
     if (!allowed(result.id, result.type!)) return;
 
-    const existing = this.getUrl(result.url!);
-    result.username!.prob = (result.prob * this.prob + this.prob) / 2;
+    const existing = this.root.urls.find((r) => r.url === result.url);
+    if (existing?.prob === Prob.SURE) return;
 
     if (existing) {
-      result.username!.prob =
-        (Math.max(existing.prob, result.prob) + Prob.SURE) / 2;
+      const startProb = Math.max(existing.username!.prob, result.prob);
+
+      existing.username!.prob =
+        (Math.max(existing.username!.prob, result.prob) + Prob.SURE) / 2;
 
       if (result.fetched) existing.fetched = true;
+      if (startProb < existing.username!.prob && options.verbose)
+        existing.log(LogType.UPDATE);
     } else {
       this.urls.push(result);
+
+      const oldProb = this.prob;
+      this.usernames.push({
+        value: result.username!.value.toLowerCase().trim(),
+        prob: result.prob,
+        new: true,
+      });
+
+      if (options.verbose && !this.isRoot) {
+        result.log(LogType.ADD);
+        if (oldProb !== this.prob) this.log(LogType.UPDATE);
+      }
     }
 
-    this.addUsername(result.username!.value, result.prob);
     this.parent?.addUrl(result);
   }
+
+  public addFirstName(
+    firstName: string,
+    prob: number,
+    prepare: boolean = true
+  ) {
+    if (prepare) {
+      firstName = firstName.toLowerCase().trim();
+      prob *= nameComplexity(firstName);
+    }
+
+    prob *= this.prob;
+
+    const existing = this.root.firstNames.find((n) => n.value === firstName);
+
+    if (existing) {
+      if (existing.prob !== Prob.SURE)
+        existing.prob = (existing.prob + prob) / 2;
+
+      prob = this.prob + (Prob.SURE - this.prob) * existing.prob;
+    }
+
+    const data: ProbValue<FirstName> = {
+      value: firstName,
+      prob,
+      new: true,
+      gender: getGender(firstName),
+    };
+
+    const oldProb = this.prob;
+    this.firstNames.push(data);
+
+    this.root.usernames
+      .filter((u) => unobfuscate(u.value).includes(firstName))
+      .forEach((u) => {
+        if (prob === Prob.SURE) return;
+        data.prob += ((Prob.SURE - data.prob) * u.prob) / 2;
+      });
+
+    if (options.verbose && !this.isRoot && oldProb < this.prob)
+      this.log(LogType.UPDATE);
+
+    this.parent?.addFirstName(firstName, prob, false);
+  }
+
+  public addLastName(lastName: string, prob: number, prepare: boolean = true) {
+    if (prepare) {
+      lastName = lastName.toLowerCase().trim();
+      prob *= nameComplexity(lastName);
+    }
+
+    prob *= this.prob;
+
+    const existing = this.root.lastNames.find((n) => n.value === lastName);
+
+    if (existing) {
+      if (existing.prob !== Prob.SURE)
+        existing.prob = (existing.prob + prob) / 2;
+
+      prob = this.prob + (Prob.SURE - this.prob) * existing.prob;
+    }
+
+    const data: ProbValue<string> = {
+      value: lastName,
+      prob,
+      new: true,
+    };
+
+    const oldProb = this.prob;
+    this.lastNames.push(data);
+
+    this.root.usernames
+      .filter((u) => unobfuscate(u.value).includes(lastName))
+      .forEach((u) => {
+        if (prob === Prob.SURE) return;
+        data.prob += ((Prob.SURE - data.prob) * u.prob) / 2;
+      });
+
+    if (options.verbose && !this.isRoot && oldProb < this.prob)
+      this.log(LogType.UPDATE);
+
+    this.parent?.addLastName(lastName, prob, false);
+  }
+
+  public addLocation(location: Location, prob: number) {
+    location.country = location.country.toLowerCase().trim();
+    location.city = location.city?.toLowerCase().trim();
+
+    const existingCountry = this.root.locations.find(
+      (l) => l.country === location.country
+    );
+
+    const existingCity = this.root.locations.find(
+      (l) => l.city === location.city && l.country === location.country
+    );
+
+    if (existingCity) {
+      if (existingCity.prob !== Prob.SURE)
+        existingCity.prob = (existingCity.prob + prob) / 2;
+
+      prob = this.prob + (Prob.SURE - this.prob) * existingCity.prob;
+    } else if (existingCountry && existingCountry.city) {
+      if (existingCountry.prob !== Prob.SURE)
+        existingCountry.prob = (existingCountry.prob + prob * 0.5) / 1.5;
+
+      prob = this.prob + ((Prob.SURE - this.prob) * existingCountry.prob) / 2;
+    } else if (existingCountry) {
+      if (existingCountry.prob !== Prob.SURE)
+        existingCountry.prob = (existingCountry.prob + prob) / 2;
+
+      prob = this.prob + (Prob.SURE - this.prob) * existingCountry.prob;
+    }
+
+    const oldProb = this.prob;
+    this.locations.push({
+      ...location,
+      prob,
+      new: true,
+    });
+
+    if (
+      (existingCountry || existingCity) &&
+      options.verbose &&
+      !this.isRoot &&
+      oldProb !== this.prob
+    )
+      this.log(LogType.UPDATE);
+
+    this.parent?.addLocation(location, prob);
+  }
+
+  public async addEmail(email: string, prob: number) {}
+
+  public addPhone(phone: Phone, prob: number) {}
 }

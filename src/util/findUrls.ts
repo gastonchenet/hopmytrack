@@ -49,7 +49,7 @@ export default function findUrls(
     const result = new Result({
       id: r.id,
       title: r.title,
-      url: r.url,
+      url: r.url.replace(/:\/\/www\./, "://"),
       prob: ((r.prob * Result.Prob.LIKELY) / maxMatches) * Result.Prob.LIKELY,
       parent,
       username: r.username,

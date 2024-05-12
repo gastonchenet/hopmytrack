@@ -199,17 +199,17 @@ export default class Website {
             });
           }
 
-          if (json.findEmails) {
-            for (const email of findEmails(html, json.emailSelector)) {
-              await result.addEmail(email.value, email.prob);
-            }
-          }
+          // if (json.findEmails) {
+          //   for (const email of findEmails(html, json.emailSelector)) {
+          //     await result.addEmail(email.value, email.prob);
+          //   }
+          // }
 
-          if (json.findPhones) {
-            findPhones(html, json.phoneSelector).forEach((phone) => {
-              result.addPhone(phone, phone.prob);
-            });
-          }
+          // if (json.findPhones) {
+          //   findPhones(html, json.phoneSelector).forEach((phone) => {
+          //     result.addPhone(phone, phone.prob);
+          //   });
+          // }
 
           if (json.findUrls) {
             const exclude = [
@@ -219,12 +219,10 @@ export default class Website {
 
             if (json.responseUrl) exclude.push(new URL(responseUrl).hostname);
 
-            const urls = findUrls(result, html, exclude, json.urlSelector);
-            urls.forEach((url) => result.addUrl(url));
+            findUrls(result, html, exclude, json.urlSelector);
           }
 
           results.push(result);
-          if (options.verbose) result.log();
 
           if (json.requestInterval && !options.proxy)
             await new Promise((resolve) =>

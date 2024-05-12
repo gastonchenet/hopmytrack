@@ -31,7 +31,7 @@ export default function findPhones(
     if (phones[phone]) {
       phones[phone].prob++;
     } else {
-      phones[phone] = { prob: 1, country };
+      phones[phone] = { prob: 1, country, new: true };
     }
   }
 
@@ -44,6 +44,7 @@ export default function findPhones(
       value: phone,
       prob: newProb,
       country,
+      new: true,
     });
   }
 

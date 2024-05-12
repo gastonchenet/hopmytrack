@@ -28,6 +28,7 @@ export default function findEmails(
       value: email,
       prob: (count / maxMatches) * Result.Prob.LIKELY,
       verified: false,
+      new: true,
     });
   }
 

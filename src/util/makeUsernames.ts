@@ -77,12 +77,12 @@ function derivateNames(firstName: string, lastName: string) {
   const usernames: ProbValue<string>[] = [
     ...derivateUsername({
       value: `${firstName}${DEFAULT_SEPARATOR}${lastName}`,
-      prob: Result.Prob.LIKELY,
+      prob: Result.Prob.SURE,
       new: true,
     }),
     ...derivateUsername({
       value: `${firstName[0]}${DEFAULT_SEPARATOR}${lastName}`,
-      prob: Result.Prob.MAYBE,
+      prob: Result.Prob.SURE,
       new: true,
     }),
   ];
