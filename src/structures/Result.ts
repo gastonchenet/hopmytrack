@@ -237,6 +237,7 @@ export default class Result {
   public emails: ProbValue<Email>[] = [];
   public phones: ProbValue<Phone>[] = [];
   public urls: Result[] = [];
+  private used: Set<string> = new Set();
 
   public constructor(options: ResultOptions) {
     this.id = options.id;
@@ -307,7 +308,15 @@ export default class Result {
       prob = Math.max(prob, (prob + Result.stackProbs(this.locations)!) / 2);
     }
 
-    return prob;
+    if (this.emails.length > 0) {
+      prob = Math.max(prob, (prob + Result.stackProbs(this.emails)!) / 2);
+    }
+
+    if (this.phones.length > 0) {
+      prob = Math.max(prob, (prob + Result.stackProbs(this.phones)!) / 2);
+    }
+
+    return isFinite(prob) ? prob : Prob.SURE;
   }
 
   public get firstName(): string | null {
@@ -368,7 +377,7 @@ export default class Result {
           .filter((n) => !n.new)
           .sort((a, b) => b.prob - a.prob)[0] ?? null,
       location: this.likelyLocation,
-      emails: this.emails.filter((u) => u.prob >= Prob.LIKELY),
+      emails: this.emails.filter((u) => u.prob >= Prob.MAYBE),
       phone: this.phones.sort((a, b) => b.prob - a.prob)[0] ?? null,
       urls: this.urls
         .sort((a, b) => b.prob - a.prob)
@@ -616,14 +625,22 @@ export default class Result {
         } ${likely.emails
           .sort((a, b) => b.prob - a.prob)
           .map(
-            (u) =>
-              `${colored ? chalk.cyan(u.value) : u.value}${
-                u.verified
+            (e) =>
+              `${colored ? chalk.cyan(e.value) : e.value}${
+                e.verified
                   ? `${colored ? chalk.black(" (") : " ("}${
                       colored ? chalk.green("✔ Valid SMTP") : "Valid SMTP"
                     }${colored ? chalk.black(")") : ")"}`
                   : ""
-              }`
+              } ${
+                colored
+                  ? (e.prob >= Result.Prob.LIKELY
+                      ? chalk.green
+                      : e.prob >= Result.Prob.MAYBE
+                      ? chalk.yellow
+                      : chalk.red)(roundDecimal(e.prob * 100, 3))
+                  : roundDecimal(e.prob * 100, 3)
+              }${colored ? chalk.black("%") : "%"}`
           )
           .join(colored ? chalk.black(", ") : ", ")}`
       );
@@ -633,7 +650,15 @@ export default class Result {
       lines.push(
         `${colored ? chalk.black("[") : "["}Phone Number${
           colored ? chalk.black("]") : "]"
-        } ${colored ? chalk.cyan(likely.phone.value) : likely.phone.value}`
+        } ${colored ? chalk.cyan(likely.phone.value) : likely.phone.value} ${
+          colored
+            ? (likely.phone.prob >= Result.Prob.LIKELY
+                ? chalk.green
+                : likely.phone.prob >= Result.Prob.MAYBE
+                ? chalk.yellow
+                : chalk.red)(roundDecimal(likely.phone.prob * 100, 3))
+            : roundDecimal(likely.phone.prob * 100, 3)
+        }${colored ? chalk.black("%") : "%"}`
       );
     }
 
@@ -691,8 +716,13 @@ export default class Result {
   }
 
   public addUrl(result: Result) {
-    if (!allowed(result.id, result.type!)) return;
+    if (
+      !allowed(result.id, result.type!) ||
+      this.used.has("url:" + result.url!)
+    )
+      return;
 
+    const oldProb = this.prob;
     const existing = this.root.urls.find((r) => r.url === result.url);
     if (existing?.prob === Prob.SURE) return;
 
@@ -705,17 +735,27 @@ export default class Result {
       if (result.fetched) existing.fetched = true;
       if (startProb < existing.username!.prob && options.verbose)
         existing.log(LogType.UPDATE);
+
+      this.used.add("url:" + result.url!);
     } else {
       this.urls.push(result);
 
-      const oldProb = this.prob;
-      this.usernames.push({
-        value: result.username!.value.toLowerCase().trim(),
-        prob: result.prob,
-        new: true,
-      });
+      const existingUsername = this.root.usernames.find(
+        (u) => result.username && u.value === result.username.value
+      );
 
-      if (options.verbose && !this.isRoot) {
+      if (existingUsername) {
+        if (existingUsername.prob !== Prob.SURE)
+          existingUsername.prob = (existingUsername.prob + result.prob) / 2;
+      } else {
+        this.usernames.push({
+          value: result.username!.value.toLowerCase().trim(),
+          prob: result.prob,
+          new: true,
+        });
+      }
+
+      if (options.verbose && this.isRoot) {
         result.log(LogType.ADD);
         if (oldProb !== this.prob) this.log(LogType.UPDATE);
       }
@@ -734,8 +774,11 @@ export default class Result {
       prob *= nameComplexity(firstName);
     }
 
+    if (this.used.has("firstName:" + firstName)) return;
+
     prob *= this.prob;
 
+    const oldProb = this.prob;
     const existing = this.root.firstNames.find((n) => n.value === firstName);
 
     if (existing) {
@@ -743,7 +786,10 @@ export default class Result {
         existing.prob = (existing.prob + prob) / 2;
 
       prob = this.prob + (Prob.SURE - this.prob) * existing.prob;
+      this.used.add("firstName:" + firstName);
     }
+
+    prob = isFinite(prob) ? prob : Prob.SURE;
 
     const data: ProbValue<FirstName> = {
       value: firstName,
@@ -752,7 +798,6 @@ export default class Result {
       gender: getGender(firstName),
     };
 
-    const oldProb = this.prob;
     this.firstNames.push(data);
 
     this.root.usernames
@@ -774,8 +819,11 @@ export default class Result {
       prob *= nameComplexity(lastName);
     }
 
+    if (this.used.has("lastName:" + lastName)) return;
+
     prob *= this.prob;
 
+    const oldProb = this.prob;
     const existing = this.root.lastNames.find((n) => n.value === lastName);
 
     if (existing) {
@@ -783,7 +831,10 @@ export default class Result {
         existing.prob = (existing.prob + prob) / 2;
 
       prob = this.prob + (Prob.SURE - this.prob) * existing.prob;
+      this.used.add("lastName:" + lastName);
     }
+
+    prob = isFinite(prob) ? prob : Prob.SURE;
 
     const data: ProbValue<string> = {
       value: lastName,
@@ -791,7 +842,6 @@ export default class Result {
       new: true,
     };
 
-    const oldProb = this.prob;
     this.lastNames.push(data);
 
     this.root.usernames
@@ -811,6 +861,10 @@ export default class Result {
     location.country = location.country.toLowerCase().trim();
     location.city = location.city?.toLowerCase().trim();
 
+    if (this.used.has("location:" + location.country)) return;
+
+    const oldProb = this.prob;
+
     const existingCountry = this.root.locations.find(
       (l) => l.country === location.country
     );
@@ -824,19 +878,23 @@ export default class Result {
         existingCity.prob = (existingCity.prob + prob) / 2;
 
       prob = this.prob + (Prob.SURE - this.prob) * existingCity.prob;
+      this.used.add("location:" + location.country + ":" + location.city);
     } else if (existingCountry && existingCountry.city) {
       if (existingCountry.prob !== Prob.SURE)
         existingCountry.prob = (existingCountry.prob + prob * 0.5) / 1.5;
 
       prob = this.prob + ((Prob.SURE - this.prob) * existingCountry.prob) / 2;
+      this.used.add("location:" + location.country);
     } else if (existingCountry) {
       if (existingCountry.prob !== Prob.SURE)
         existingCountry.prob = (existingCountry.prob + prob) / 2;
 
       prob = this.prob + (Prob.SURE - this.prob) * existingCountry.prob;
+      this.used.add("location:" + location.country);
     }
 
-    const oldProb = this.prob;
+    prob = isFinite(prob) ? prob : Prob.SURE;
+
     this.locations.push({
       ...location,
       prob,
@@ -854,7 +912,69 @@ export default class Result {
     this.parent?.addLocation(location, prob);
   }
 
-  public async addEmail(email: string, prob: number) {}
+  public addEmail(email: Email, prob: number) {
+    email.value = email.value.toLowerCase().trim();
+    prob *= this.prob;
 
-  public addPhone(phone: Phone, prob: number) {}
+    if (this.used.has("email:" + email.value)) return;
+
+    const oldProb = this.prob;
+    const existing = this.root.emails.find((e) => e.value === email.value);
+
+    if (existing) {
+      if (existing.prob !== Prob.SURE)
+        existing.prob = (existing.prob + prob) / 2;
+
+      prob = this.prob + (Prob.SURE - this.prob) * existing.prob;
+      this.used.add("email:" + email.value);
+    }
+
+    prob = isFinite(prob) ? prob : Prob.SURE;
+
+    const data: ProbValue<Email> = {
+      ...email,
+      prob,
+      new: true,
+    };
+
+    this.emails.push(data);
+
+    if (options.verbose && !this.isRoot && oldProb !== this.prob)
+      this.log(LogType.UPDATE);
+
+    this.parent?.addEmail(email, prob);
+  }
+
+  public addPhone(phone: Phone, prob: number) {
+    phone.value = phone.value.toLowerCase().trim();
+    prob *= this.prob;
+
+    if (this.used.has("phone:" + phone.value)) return;
+
+    const oldProb = this.prob;
+    const existing = this.root.phones.find((p) => p.value === phone.value);
+
+    if (existing) {
+      if (existing.prob !== Prob.SURE)
+        existing.prob = (existing.prob + prob) / 2;
+
+      prob = this.prob + (Prob.SURE - this.prob) * existing.prob;
+      this.used.add("phone:" + phone.value);
+    }
+
+    prob = isFinite(prob) ? prob : Prob.SURE;
+
+    const data: ProbValue<Phone> = {
+      ...phone,
+      prob,
+      new: true,
+    };
+
+    this.phones.push(data);
+
+    if (options.verbose && !this.isRoot && oldProb !== this.prob)
+      this.log(LogType.UPDATE);
+
+    this.parent?.addPhone(phone, prob);
+  }
 }

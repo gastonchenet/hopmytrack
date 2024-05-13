@@ -1,11 +1,12 @@
 import type { Email, ProbValue } from "../structures/Result";
 import findInPage from "./findInPage";
 import Result from "../structures/Result";
+import verifyEmail from "./verifyEmail";
 
-export default function findEmails(
+export default async function findEmails(
   html: string,
   selector?: string
-): ProbValue<Email>[] {
+): Promise<ProbValue<Email>[]> {
   if (selector) html = findInPage(html, selector);
 
   const results: ProbValue<Email>[] = [];
@@ -27,7 +28,7 @@ export default function findEmails(
     results.push({
       value: email,
       prob: (count / maxMatches) * Result.Prob.LIKELY,
-      verified: false,
+      verified: await verifyEmail(email),
       new: true,
     });
   }

@@ -112,6 +112,10 @@ export const optionList = {
 
 const options = parseArgs(Bun.argv.slice(2), optionList);
 
+if (options.proxy && !options.proxy.startsWith("http")) {
+  options.proxy = `http://${options.proxy}`;
+}
+
 const whitelist = [...new Set(options.whitelist ?? [])];
 const blacklist = [...new Set(options.blacklist ?? [])];
 

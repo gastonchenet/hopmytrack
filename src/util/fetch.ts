@@ -1,6 +1,6 @@
 import startOptions from "../options";
 
-type FetchOptions = {
+export type FetchOptions = {
   timeout?: number;
   abortIfCached?: boolean;
 } & FetchRequestInit;

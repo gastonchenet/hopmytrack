@@ -9,7 +9,7 @@ import findNames from "../util/findNames";
 import findEmails from "../util/findEmails";
 import findPhones from "../util/findPhones";
 import findUrls from "../util/findUrls";
-import fetch from "../util/fetch";
+import fetch, { type FetchOptions } from "../util/fetch";
 import chalk from "chalk";
 
 enum ErrorType {
@@ -49,6 +49,7 @@ type WebsiteOptions = {
   nsfw?: boolean;
   headers?: Record<string, string>;
   usernameOptions?: FindUsernamesOptions;
+  disableProxy?: boolean;
 } & (
   | { errorType: ErrorType.STATUS_CODE; errorBody?: never; errorUrl?: never }
   | {
@@ -126,15 +127,18 @@ export default class Website {
             encodeURIComponent(username.value)
           );
 
-          const response = await fetch(requestUrl, {
+          const init: FetchOptions = {
             abortIfCached: true,
             headers,
-          });
+          };
 
+          if (!json.disableProxy && options.proxy) init.proxy = options.proxy;
+
+          const response = await fetch(requestUrl, init);
           if (response.status === 408) continue;
 
           if (!response.ok) {
-            if (json.requestInterval && !options.proxy)
+            if (json.requestInterval && (!options.proxy || json.disableProxy))
               await new Promise((resolve) =>
                 setTimeout(resolve, json.requestInterval)
               );
@@ -153,7 +157,7 @@ export default class Website {
             (json.errorType === ErrorType.RESPONSE_URL &&
               response.url === json.errorUrl)
           ) {
-            if (json.requestInterval && !options.proxy)
+            if (json.requestInterval && (!options.proxy || json.disableProxy))
               await new Promise((resolve) =>
                 setTimeout(resolve, json.requestInterval)
               );
@@ -199,17 +203,17 @@ export default class Website {
             });
           }
 
-          // if (json.findEmails) {
-          //   for (const email of findEmails(html, json.emailSelector)) {
-          //     await result.addEmail(email.value, email.prob);
-          //   }
-          // }
+          if (json.findEmails) {
+            for (const email of await findEmails(html, json.emailSelector)) {
+              result.addEmail(email, email.prob);
+            }
+          }
 
-          // if (json.findPhones) {
-          //   findPhones(html, json.phoneSelector).forEach((phone) => {
-          //     result.addPhone(phone, phone.prob);
-          //   });
-          // }
+          if (json.findPhones) {
+            findPhones(html, json.phoneSelector).forEach((phone) => {
+              result.addPhone(phone, phone.prob);
+            });
+          }
 
           if (json.findUrls) {
             const exclude = [
@@ -224,7 +228,7 @@ export default class Website {
 
           results.push(result);
 
-          if (json.requestInterval && !options.proxy)
+          if (json.requestInterval && (!options.proxy || json.disableProxy))
             await new Promise((resolve) =>
               setTimeout(resolve, json.requestInterval)
             );

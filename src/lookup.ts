@@ -6,6 +6,7 @@ import Website from "./structures/Website";
 import logger from "./util/logger";
 import chalk from "chalk";
 import options, { allowed } from "./options";
+import verifyProxy from "./util/verifyProxy";
 
 const SPINNER_CHARS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
@@ -106,6 +107,10 @@ async function recursion(result: Result, iteration = 0) {
 }
 
 export default async function lookup(searchData: SearchData) {
-  const result = await Result.fromSearchData(searchData);
-  recursion(result);
+  if (options.proxy && !(await verifyProxy(options.proxy))) {
+    logger.error("Invalid proxy, your proxy should be rotative.");
+    process.exit(1);
+  }
+
+  recursion(await Result.fromSearchData(searchData));
 }

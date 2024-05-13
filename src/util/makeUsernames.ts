@@ -9,8 +9,8 @@ export type FindUsernamesOptions = {
 const SEPARATORS = Object.freeze(["", "_", ".", " ", "-"]);
 const DEFAULT_SEPARATOR = SEPARATORS.filter((s) => s.length > 0)[0];
 const SEPARATOR_WEIGHT = 2;
-const NUMBER_WEIGHT = 10;
-const SPECIAL_WEIGHT = 15;
+const NUMBER_WEIGHT = 5;
+const SPECIAL_WEIGHT = 10;
 
 export function usernameComplexity(username: string) {
   const length = username.length;

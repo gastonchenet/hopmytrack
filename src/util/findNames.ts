@@ -2,7 +2,7 @@ import type { ProbValue } from "../structures/Result";
 import males from "../data/males.json";
 import females from "../data/females.json";
 import findInPage from "./findInPage";
-import Result, { Gender } from "../structures/Result";
+import { Gender } from "../structures/Result";
 import unobfuscate from "./unobfuscate";
 
 const REGEX = new RegExp(

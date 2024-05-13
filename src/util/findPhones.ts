@@ -21,7 +21,6 @@ export default function findPhones(
 
   const results: ProbValue<Phone>[] = [];
   const phones: Record<string, Omit<ProbValue<Phone>, "value">> = {};
-
   const matches = findPhoneNumbersInText(html);
 
   for (const match of matches) {

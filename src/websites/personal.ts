@@ -64,7 +64,7 @@ async function websiteData(
   if (ttl <= 0) return result;
 
   const { firstNames, lastNames } = findNames(html);
-  const emails = findEmails(html);
+  const emails = await findEmails(html);
   const phones = findPhones(html);
 
   const urls = findUrls(result, html, [
@@ -80,10 +80,7 @@ async function websiteData(
     result.addLastName(lastName.value, lastName.prob)
   );
 
-  for (const email of emails) {
-    await result.addEmail(email.value, email.prob);
-  }
-
+  emails.forEach((email) => result.addEmail(email, email.prob));
   phones.forEach((phone) => result.addPhone(phone, phone.prob));
   urls.forEach((url) => result.addUrl(url));
 

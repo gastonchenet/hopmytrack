@@ -361,4 +361,10 @@ export default Object.freeze([
     regex:
       /(?:https?:\/\/)?(?:www\.)?erome\.com\/(?<username>[a-zA-Z0-9_]{3,20})/gi,
   },
+  {
+    title: "Telegram",
+    id: "telegram",
+    fetchFunction: "websites/telegram.ts",
+    regex: /(?:https?:\/\/)?(?:www\.)?t\.me\/(?<username>[a-zA-Z0-9_]{5,32})/gi,
+  },
 ]);

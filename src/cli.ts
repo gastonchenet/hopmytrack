@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import type Website from "./structures/Website";
 import chalk from "chalk";
+import verifyProxy from "./util/verifyProxy";
 
 process.on("unhandledRejection", (reason) => {
   process.stdout.write("\r\x1b[K\u001B[?25h");
@@ -98,8 +99,5 @@ if (options.info) {
 }
 
 lookup({
-  usernames: ["du_cassoulet", "gastonchenet"],
-  firstName: "Gaston",
-  lastName: "Chenet",
-  location: { country: "France", city: "Paris" },
+  usernames: ["du_cassoulet"],
 });

@@ -33,8 +33,14 @@ function verifyEmailWithSMTP(MXName: string, email: string): Promise<boolean> {
     const socket = net.createConnection(SMTP_PORT, MXName);
     let responses = 0;
 
+    const timeout = setTimeout(() => {
+      socket.end();
+      return resolve(false);
+    }, 3_000);
+
     socket.on("data", (data) => {
       const response = data.toString();
+      clearTimeout(timeout);
 
       switch (responses) {
         case SMTPResponse.CONNECTED: {
