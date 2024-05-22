@@ -85,7 +85,7 @@ export default Object.freeze([
   {
     title: "Twitch",
     id: "twitch",
-    fetchFunction: "websites/twitch.ts",
+    fetchFunction: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?twitch\.tv\/(?<username>[a-zA-Z0-9_]{4,25})/gi,
   },
@@ -183,7 +183,7 @@ export default Object.freeze([
   {
     title: "Steam",
     id: "steam",
-    fetchFunction: "websites/steam.ts",
+    fetchFunction: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?steamcommunity\.com\/id\/(?<username>[a-zA-Z0-9_-]{3,32})/gi,
   },
@@ -364,7 +364,7 @@ export default Object.freeze([
   {
     title: "Telegram",
     id: "telegram",
-    fetchFunction: "websites/telegram.ts",
+    fetchFunction: null,
     regex: /(?:https?:\/\/)?(?:www\.)?t\.me\/(?<username>[a-zA-Z0-9_]{5,32})/gi,
   },
 ]);

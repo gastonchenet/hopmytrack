@@ -1,12 +1,14 @@
 import lookup from "./lookup";
 import tool from "../tool.json";
-import options, { optionList } from "./options";
+import options, { blacklist, optionList } from "./options";
 import logger from "./util/logger";
 import path from "path";
 import fs from "fs";
 import type Website from "./structures/Website";
 import chalk from "chalk";
-import verifyProxy from "./util/verifyProxy";
+import { randomBytes } from "crypto";
+import readYamlFile from "read-yaml-file";
+import type { SearchData } from "./structures/Result";
 
 process.on("unhandledRejection", (reason) => {
   process.stdout.write("\r\x1b[K\u001B[?25h");
@@ -98,6 +100,28 @@ if (options.info) {
   process.exit(0);
 }
 
-lookup({
-  usernames: ["du_cassoulet"],
-});
+if (!options.input) {
+  logger.error("No input file provided.");
+  process.exit(1);
+}
+
+logger.log("Searching for unavailable websites...");
+
+const blackSheep = await lookup(
+  { username: randomBytes(8).toString("hex") },
+  { depth: 1, log: false, derivateUsername: false }
+);
+
+if (blackSheep.urls.length === 0) {
+  logger.log("No unavailable websites found.");
+} else {
+  logger.log(
+    `Found ${blackSheep.urls.length} unavailable website${
+      blackSheep.urls.length > 1 ? "s" : ""
+    }.`
+  );
+}
+
+blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
+
+lookup(await readYamlFile<SearchData>(path.join(process.cwd(), options.input)));

@@ -108,6 +108,14 @@ export const optionList = {
     usage: "--proxy=<proxy>",
     default: null,
   },
+  input: {
+    alias: "I",
+    unique: false,
+    type: OptionPayloadType.STRING,
+    description: "Input file.",
+    usage: "--input=<file>",
+    default: null,
+  },
 };
 
 const options = parseArgs(Bun.argv.slice(2), optionList);

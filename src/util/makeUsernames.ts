@@ -73,6 +73,16 @@ function derivateUsername(username: ProbValue<string>) {
   return usernames;
 }
 
+function retractLastName(lastName: string) {
+  const consonants = lastName.match(/[^aeiouy]/gi) ?? [];
+  const usernames: ProbValue<string>[] = [];
+  // chenet => cht, chnt
+  // hadjem => hdm, hjm
+
+  const firstLetter = consonants[0] ?? "";
+  const lastLetter = consonants.at(-1) ?? "";
+}
+
 function derivateNames(firstName: string, lastName: string) {
   const usernames: ProbValue<string>[] = [
     ...derivateUsername({
@@ -82,7 +92,7 @@ function derivateNames(firstName: string, lastName: string) {
     }),
     ...derivateUsername({
       value: `${firstName[0]}${DEFAULT_SEPARATOR}${lastName}`,
-      prob: Result.Prob.SURE,
+      prob: Result.Prob.MAYBE,
       new: true,
     }),
   ];
