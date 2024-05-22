@@ -41,8 +41,8 @@ export type FirstName = {
 };
 
 export type SearchData = {
-  firstName?: string;
-  lastName?: string;
+  first_name?: string;
+  last_name?: string;
   location?: string | Location;
   phone?: string;
 } & (
@@ -172,17 +172,17 @@ export default class Result {
       }
     }
 
-    if (data.firstName) {
+    if (data.first_name) {
       result.firstNames.push({
-        value: data.firstName?.toLowerCase().trim(),
+        value: data.first_name?.toLowerCase().trim(),
         prob: Prob.SURE,
         new: true,
       });
     }
 
-    if (data.lastName) {
+    if (data.last_name) {
       result.lastNames.push({
-        value: data.lastName?.toLowerCase().trim(),
+        value: data.last_name?.toLowerCase().trim(),
         prob: Prob.SURE,
         new: true,
       });

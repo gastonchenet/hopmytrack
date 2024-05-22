@@ -8,7 +8,12 @@ import findNames from "../util/findNames";
 import findUrls from "../util/findUrls";
 import options from "../options";
 
-const blacklistedLinks = ["facebook.com/plesk"];
+const blacklistedLinks = [
+  "facebook.com/plesk",
+  "youtube.com/channel/uceu-_6yhgqfcvshlbexlnla",
+  "youtube.com/embed",
+];
+
 const domains = [
   "com",
   "org",
@@ -22,6 +27,7 @@ const domains = [
   "it",
   "io",
   "github.io",
+  // "is-a.dev",
 ];
 
 function getURLFromHref(rootUrl: string, html: string) {
@@ -67,10 +73,7 @@ async function websiteData(
   const emails = await findEmails(html);
   const phones = findPhones(html);
 
-  const urls = findUrls(result, html, [
-    new URL(url).hostname,
-    ...blacklistedLinks,
-  ]);
+  findUrls(result, html, [new URL(url).hostname, ...blacklistedLinks]);
 
   firstNames.forEach((firstName) =>
     result.addFirstName(firstName.value, firstName.prob)
@@ -82,7 +85,6 @@ async function websiteData(
 
   emails.forEach((email) => result.addEmail(email, email.prob));
   phones.forEach((phone) => result.addPhone(phone, phone.prob));
-  urls.forEach((url) => result.addUrl(url));
 
   const childrenUrls = getURLFromHref(url, html);
 

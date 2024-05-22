@@ -24,7 +24,7 @@ export default function findUrls(
     if (!website.regex) continue;
     const matches = [...html.matchAll(website.regex)];
     const filtered = matches.filter(
-      (m) => !exceptions?.some((e) => m[0].includes(e))
+      (m) => !exceptions?.some((e) => m[0].toLowerCase().includes(e))
     );
 
     if (filtered.length > 0) {

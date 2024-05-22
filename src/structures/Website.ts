@@ -1,4 +1,4 @@
-import Result from "./Result";
+import Result, { type ProbValue } from "./Result";
 import options from "../options";
 import UserAgent from "user-agents";
 import makeUsernames, {
@@ -11,6 +11,7 @@ import findPhones from "../util/findPhones";
 import findUrls from "../util/findUrls";
 import fetch, { type FetchOptions } from "../util/fetch";
 import chalk from "chalk";
+import type { LookupOptions } from "../lookup";
 
 enum ErrorType {
   STATUS_CODE,
@@ -38,7 +39,10 @@ enum Actions {
   PAGE_URLS = "page_urls",
 }
 
-type ExecuteFunction = (previousResult: Result) => Promise<Result[]>;
+type ExecuteFunction = (
+  previousResult: Result,
+  lookupOptions: LookupOptions
+) => Promise<Result[]>;
 
 type WebsiteOptions = {
   title: string;
@@ -117,9 +121,16 @@ export default class Website {
       json.type,
       json.nsfw ?? false,
       actions,
-      async (previousResult) => {
+      async (previousResult, lookupOptions) => {
         const results: Result[] = [];
-        const usernames = makeUsernames(previousResult, json.usernameOptions);
+
+        let usernames: ProbValue<string>[] = [];
+
+        if (lookupOptions.derivateUsername) {
+          usernames = makeUsernames(previousResult, json.usernameOptions);
+        } else {
+          usernames = [previousResult.username!];
+        }
 
         for (const username of usernames) {
           const requestUrl = json.requestUrl.replace(
