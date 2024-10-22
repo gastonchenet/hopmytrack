@@ -8,7 +8,7 @@ export default {
     console.log(
       `${
         !options["no-color"]
-          ? chalk.black(`[${moment().format("HH:mm:ss")}]`)
+          ? chalk.gray(`[${moment().format("HH:mm:ss")}]`)
           : `[${moment().format("HH:mm:ss")}]`
       } ${message}`
     );
@@ -21,7 +21,7 @@ export default {
     console.error(
       `${
         !options["no-color"]
-          ? chalk.black(`[${moment().format("HH:mm:ss")}]`)
+          ? chalk.gray(`[${moment().format("HH:mm:ss")}]`)
           : `[${moment().format("HH:mm:ss")}]`
       } ${
         !options["no-color"] ? chalk.red(`Error: ${error}`) : `Error: ${error}`
@@ -32,7 +32,7 @@ export default {
     console.warn(
       `${
         !options["no-color"]
-          ? chalk.black(`[${moment().format("HH:mm:ss")}]`)
+          ? chalk.gray(`[${moment().format("HH:mm:ss")}]`)
           : `[${moment().format("HH:mm:ss")}]`
       } ${
         !options["no-color"]

@@ -6,9 +6,14 @@ import path from "path";
 import fs from "fs";
 import type Website from "./structures/Website";
 import chalk from "chalk";
-import { randomBytes } from "crypto";
 import readYamlFile from "read-yaml-file";
 import type { SearchData } from "./structures/Result";
+
+function randomHex(length: number): string {
+  return [...Array(length)]
+    .map(() => Math.floor(Math.random() * 16).toString(16))
+    .join("");
+}
 
 process.on("unhandledRejection", (reason) => {
   process.stdout.write("\r\x1b[K\u001B[?25h");
@@ -34,23 +39,53 @@ if (options.version) {
 }
 
 if (options.help) {
-  console.log("Options:");
+  console.log(
+    tool.description
+      .replace(new RegExp("HopMyTrack", "g"), chalk.magenta.bold("HopMyTrack"))
+      .replace(new RegExp("OSINT", "g"), chalk.bold("OSINT"))
+  );
+
+  console.log(chalk.bold("\nUsage:"));
+  console.log(`  ${chalk.magenta.bold("hmt")} [...flags]`);
+
+  console.log(chalk.bold("\nExamples:"));
+  console.log(
+    `  ${chalk.magenta.bold("hmt")} -I ${chalk.green(
+      '"username:example;first_name:John;last_name:Doe"'
+    )} -V! -b github -d 5 -o output.txt\n  ${chalk.gray(
+      "# Search for 'John Doe' with the username 'example' in verbose mode with NSFW enabled, blacklist GitHub and search for 5 levels deep, output the results to 'output.txt'."
+    )}`
+  );
+
+  console.log(
+    `\n  ${chalk.magenta.bold(
+      "hmt"
+    )} -I info.yml -Vc -w github,gitlab -d 3 -p ${chalk.underline.cyan(
+      "https://username:password@proxy.example.com:8080"
+    )}\n  ${chalk.gray(
+      "# Search using the data in 'info.yml' in verbose mode without outputing colors, check GitHub and GitLab, search for 3 levels deep, and use a proxy."
+    )}`
+  );
+
+  console.log(chalk.bold("\nFlags:"));
 
   const largestName = Math.max(
     ...Object.keys(optionList).map((name) => name.length)
   );
 
-  const largestUsage = Math.max(
-    ...Object.values(optionList).map((option) => option.usage.length)
+  const largestDescription = Math.max(
+    ...Object.values(optionList).map((option) => option.description.length)
   );
 
   for (const [name, option] of Object.entries(optionList).sort((a, b) =>
     a[0].localeCompare(b[0])
   )) {
     console.log(
-      `  ${name.padEnd(largestName + 3)} -${
-        option.alias
-      }, ${option.usage.padEnd(largestUsage + 3)} ${option.description}`
+      `  ${chalk.cyan(`-${option.alias}`)}, ${chalk.cyan(
+        `--${name.padEnd(largestName + 3)}`
+      )} ${option.description.padEnd(largestDescription + 3)} ${chalk.gray(
+        option.usage
+      )}`
     );
   }
 
@@ -88,10 +123,14 @@ if (options.info) {
     console.log(
       `Websites of type ${chalk.cyan(
         chalk.italic(options.info.toUpperCase())
-      )}${chalk.black(":")}\n${typeWebsites
+      )}${chalk.gray(":")}\n${typeWebsites
         .map(
           (w) =>
-            `${chalk.black("-")} ${w.title} ${chalk.black(`(id: ${w.id})`)}`
+            `${chalk.gray("-")} ${w.title} ${chalk.gray(`(id: ${w.id})`)}${
+              w.nsfw
+                ? ` ${chalk.gray("(")}${chalk.red("!")}${chalk.gray(")")}`
+                : ""
+            }`
         )
         .join("\n")}`
     );
@@ -101,14 +140,14 @@ if (options.info) {
 }
 
 if (!options.input) {
-  logger.error("No input file provided.");
+  logger.error("No input string/file provided.");
   process.exit(1);
 }
 
 logger.log("Searching for unavailable websites...");
 
 const blackSheep = await lookup(
-  { username: randomBytes(8).toString("hex") },
+  { username: randomHex(16) },
   { depth: 1, log: false, derivateUsername: false }
 );
 
@@ -124,4 +163,43 @@ if (blackSheep.urls.length === 0) {
 
 blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
 
-lookup(await readYamlFile<SearchData>(path.join(process.cwd(), options.input)));
+if (/\.ya?ml$/.test(options.input)) {
+  lookup(
+    await readYamlFile<SearchData>(path.join(process.cwd(), options.input))
+  );
+} else {
+  const entries = options.input.split(";");
+
+  if (entries.length === 0) {
+    logger.error("Invalid input string.");
+    process.exit(1);
+  }
+
+  const data: SearchData = {};
+
+  entries.forEach((entry: string) => {
+    const [key, value] = entry.split(":") as [keyof SearchData, string];
+
+    if (!/^[a-z_]+$/.test(key)) {
+      logger.error(`Invalid key '${key}'.`);
+      process.exit(1);
+    }
+
+    if (!/^[a-zA-Z0-9,._-]+$/.test(value)) {
+      logger.error(`Invalid value '${value}'.`);
+      process.exit(1);
+    }
+
+    if (value.includes(",")) {
+      data[key] = value.split(",") as
+        | (string & (string | Location) & string[])
+        | undefined;
+    } else {
+      data[key] = value as
+        | (string & (string | Location) & string[])
+        | undefined;
+    }
+  });
+
+  lookup(data);
+}

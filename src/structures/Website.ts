@@ -278,19 +278,19 @@ export default class Website {
 
     lines.push(
       !options["no-color"]
-        ? `${chalk.bold(this.title)} ${chalk.black("(id:")} ${
+        ? `${chalk.bold(this.title)} ${chalk.gray("(id:")} ${
             this.id
-          }${chalk.black(")")}`
+          }${chalk.gray(")")}`
         : `${this.title} (${this.id})`
     );
 
     lines.push(
       !options["no-color"]
-        ? `${chalk.black("Info:")} ${chalk.cyan(
+        ? `${chalk.gray("Info:")} ${chalk.cyan(
             chalk.italic(this.type.toUpperCase())
           )}${
             this.nsfw
-              ? ` ${chalk.black("(")}${chalk.red("NSFW")}${chalk.black(")")}`
+              ? ` ${chalk.gray("(")}${chalk.red("NSFW")}${chalk.gray(")")}`
               : ""
           }`
         : `Info: ${this.type.toUpperCase()}${this.nsfw ? " (NSFW)" : ""}`
@@ -300,13 +300,13 @@ export default class Website {
       lines.push("");
 
       lines.push(
-        !options["no-color"] ? chalk.black("Info taken:") : "Info taken:"
+        !options["no-color"] ? chalk.gray("Info taken:") : "Info taken:"
       );
 
       for (const action of this.actions) {
         lines.push(
           !options["no-color"]
-            ? `${chalk.black("-")} ${chalk.cyan(action)}`
+            ? `${chalk.gray("-")} ${chalk.cyan(action)}`
             : `- ${action}`
         );
       }

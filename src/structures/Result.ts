@@ -488,7 +488,7 @@ export default class Result {
 
   public log(type: LogType) {
     logger.log(
-      `${!options["no-color"] ? chalk.black("(") : "("}${
+      `${!options["no-color"] ? chalk.gray("(") : "("}${
         type === LogType.ADD
           ? !options["no-color"]
             ? chalk.green("+")
@@ -500,14 +500,14 @@ export default class Result {
           : !options["no-color"]
           ? chalk.red("-")
           : "-"
-      }${!options["no-color"] ? chalk.black(")") : ")"} ${this.title}${
+      }${!options["no-color"] ? chalk.gray(")") : ")"} ${this.title}${
         this.nsfw
-          ? ` ${!options["no-color"] ? chalk.black("(") : "("}${
+          ? ` ${!options["no-color"] ? chalk.gray("(") : "("}${
               !options["no-color"] ? chalk.red("!") : "!"
-            }${!options["no-color"] ? chalk.black(")") : ")"}`
+            }${!options["no-color"] ? chalk.gray(")") : ")"}`
           : ""
-      }${chalk.black(":")} ${
-        !options["no-color"] ? chalk.cyan(chalk.underline(this.url)) : this.url
+      }${chalk.gray(":")} ${
+        !options["no-color"] ? chalk.underline.cyan(this.url) : this.url
       } ${
         !options["no-color"]
           ? (this.prob >= Result.Prob.LIKELY
@@ -516,7 +516,7 @@ export default class Result {
               ? chalk.yellow
               : chalk.red)(roundDecimal(this.prob * 100, 3))
           : roundDecimal(this.prob * 100, 3)
-      }${!options["no-color"] ? chalk.black("%") : "%"}`
+      }${!options["no-color"] ? chalk.gray("%") : "%"}`
     );
   }
 
@@ -526,8 +526,8 @@ export default class Result {
 
     if (likely.usernames.length > 0) {
       lines.push(
-        `${colored ? chalk.black("[") : "["}Usernames${
-          colored ? chalk.black("]") : "]"
+        `${colored ? chalk.gray("[") : "["}Usernames${
+          colored ? chalk.gray("]") : "]"
         } ${likely.usernames
           .sort((a, b) => b.prob - a.prob)
           .map(
@@ -540,23 +540,23 @@ export default class Result {
                       ? chalk.yellow
                       : chalk.red)(roundDecimal(u.prob * 100, 3))
                   : roundDecimal(u.prob * 100, 3)
-              }${colored ? chalk.black("%") : "%"}`
+              }${colored ? chalk.gray("%") : "%"}`
           )
-          .join(colored ? chalk.black(", ") : ", ")}`
+          .join(colored ? chalk.gray(", ") : ", ")}`
       );
     }
 
     if (likely.firstName) {
       lines.push(
-        `${colored ? chalk.black("[") : "["}First Name${
-          colored ? chalk.black("]") : "]"
+        `${colored ? chalk.gray("[") : "["}First Name${
+          colored ? chalk.gray("]") : "]"
         } ${
           colored
             ? chalk.cyan(capitalize(likely.firstName.value))
             : capitalize(likely.firstName.value)
         }${
           likely.firstName.gender !== undefined
-            ? ` ${colored ? chalk.black("(") : "("}${
+            ? ` ${colored ? chalk.gray("(") : "("}${
                 (likely.firstName.gender as Gender) === Gender.MALE
                   ? colored
                     ? chalk.blue("♂")
@@ -564,7 +564,7 @@ export default class Result {
                   : colored
                   ? chalk.red("♀")
                   : "Female"
-              }${colored ? chalk.black(")") : ")"}`
+              }${colored ? chalk.gray(")") : ")"}`
             : ""
         } ${
           colored
@@ -574,14 +574,14 @@ export default class Result {
                 ? chalk.yellow
                 : chalk.red)(roundDecimal(likely.firstName.prob * 100, 3))
             : roundDecimal(likely.firstName.prob * 100, 3)
-        }${colored ? chalk.black("%") : "%"}`
+        }${colored ? chalk.gray("%") : "%"}`
       );
     }
 
     if (likely.lastName) {
       lines.push(
-        `${colored ? chalk.black("[") : "["}Last Name${
-          colored ? chalk.black("]") : "]"
+        `${colored ? chalk.gray("[") : "["}Last Name${
+          colored ? chalk.gray("]") : "]"
         } ${
           colored
             ? chalk.cyan(capitalize(likely.lastName.value, true))
@@ -594,14 +594,14 @@ export default class Result {
                 ? chalk.yellow
                 : chalk.red)(roundDecimal(likely.lastName.prob * 100, 3))
             : roundDecimal(likely.lastName.prob * 100, 3)
-        }${colored ? chalk.black("%") : "%"}`
+        }${colored ? chalk.gray("%") : "%"}`
       );
     }
 
     if (likely.location) {
       lines.push(
-        `${colored ? chalk.black("[") : "["}Location${
-          colored ? chalk.black("]") : "]"
+        `${colored ? chalk.gray("[") : "["}Location${
+          colored ? chalk.gray("]") : "]"
         } ${
           colored
             ? chalk.cyan(capitalize(parseLocation(likely.location), true))
@@ -614,23 +614,23 @@ export default class Result {
                 ? chalk.yellow
                 : chalk.red)(roundDecimal(likely.location.prob * 100, 3))
             : roundDecimal(likely.location.prob * 100, 3)
-        }${colored ? chalk.black("%") : "%"}`
+        }${colored ? chalk.gray("%") : "%"}`
       );
     }
 
     if (likely.emails.length > 0) {
       lines.push(
-        `${colored ? chalk.black("[") : "["}Emails${
-          colored ? chalk.black("]") : "]"
+        `${colored ? chalk.gray("[") : "["}Emails${
+          colored ? chalk.gray("]") : "]"
         } ${likely.emails
           .sort((a, b) => b.prob - a.prob)
           .map(
             (e) =>
               `${colored ? chalk.cyan(e.value) : e.value}${
                 e.verified
-                  ? `${colored ? chalk.black(" (") : " ("}${
+                  ? `${colored ? chalk.gray(" (") : " ("}${
                       colored ? chalk.green("✔ Valid SMTP") : "Valid SMTP"
-                    }${colored ? chalk.black(")") : ")"}`
+                    }${colored ? chalk.gray(")") : ")"}`
                   : ""
               } ${
                 colored
@@ -640,16 +640,16 @@ export default class Result {
                       ? chalk.yellow
                       : chalk.red)(roundDecimal(e.prob * 100, 3))
                   : roundDecimal(e.prob * 100, 3)
-              }${colored ? chalk.black("%") : "%"}`
+              }${colored ? chalk.gray("%") : "%"}`
           )
-          .join(colored ? chalk.black(", ") : ", ")}`
+          .join(colored ? chalk.gray(", ") : ", ")}`
       );
     }
 
     if (likely.phone) {
       lines.push(
-        `${colored ? chalk.black("[") : "["}Phone Number${
-          colored ? chalk.black("]") : "]"
+        `${colored ? chalk.gray("[") : "["}Phone Number${
+          colored ? chalk.gray("]") : "]"
         } ${colored ? chalk.cyan(likely.phone.value) : likely.phone.value} ${
           colored
             ? (likely.phone.prob >= Result.Prob.LIKELY
@@ -658,7 +658,7 @@ export default class Result {
                 ? chalk.yellow
                 : chalk.red)(roundDecimal(likely.phone.prob * 100, 3))
             : roundDecimal(likely.phone.prob * 100, 3)
-        }${colored ? chalk.black("%") : "%"}`
+        }${colored ? chalk.gray("%") : "%"}`
       );
     }
 
@@ -667,16 +667,16 @@ export default class Result {
 
       for (const website of likely.urls) {
         lines.push(
-          `${colored ? chalk.black("[") : "["}${website.title}${
-            colored ? chalk.black("]") : "]"
+          `${colored ? chalk.gray("[") : "["}${website.title}${
+            colored ? chalk.gray("]") : "]"
           }${
             website.nsfw
-              ? ` ${colored ? chalk.black("(") : "("}${
+              ? ` ${colored ? chalk.gray("(") : "("}${
                   colored ? chalk.red("!") : "!"
-                }${colored ? chalk.black(")") : ")"}`
+                }${colored ? chalk.gray(")") : ")"}`
               : ""
           } ${
-            colored ? chalk.cyan(chalk.underline(website.url)) : website.url
+            colored ? chalk.underline.cyan(website.url) : website.url
           } ${
             colored
               ? (website.prob >= Result.Prob.LIKELY
@@ -685,15 +685,15 @@ export default class Result {
                   ? chalk.yellow
                   : chalk.red)(roundDecimal(website.prob * 100, 3))
               : roundDecimal(website.prob * 100, 3)
-          }${colored ? chalk.black("%") : "%"}${
+          }${colored ? chalk.gray("%") : "%"}${
             website.fetched
               ? colored
-                ? `${chalk.black(" (")}${chalk.green("✔ Fetched")}${chalk.black(
+                ? `${chalk.gray(" (")}${chalk.green("✔ Fetched")}${chalk.gray(
                     ")"
                   )}`
                 : " (Fetched)"
               : colored
-              ? `${chalk.black(" (")}${chalk.red("✘ Not Fetched")}${chalk.black(
+              ? `${chalk.gray(" (")}${chalk.red("✘ Not Fetched")}${chalk.gray(
                   ")"
                 )}`
               : " (Not Fetched)"

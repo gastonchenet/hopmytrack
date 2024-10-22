@@ -1,5 +1,5 @@
-import dns from "dns";
-import net from "net";
+import dns from "node:dns";
+import net from "node:net";
 
 const SMTP_PORT = 25;
 

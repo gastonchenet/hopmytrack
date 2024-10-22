@@ -1,4 +1,7 @@
 {
   "name": "HopMyTrack",
-  "version": "0.1.14"
+  "description": "HopMyTrack is an OSINT (Open Source Intelligence) tool that allows you to find every social media profile of a person using known info.",
+  "version": "0.1.15",
+  "author": "du_cassoulet",
+  "repository": "https://github.com/gastonchenet"
 }

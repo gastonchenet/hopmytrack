@@ -113,7 +113,7 @@ export default Object.freeze([
   {
     title: "DailyMotion",
     id: "dailymotion",
-    fetchFunction: "websites/dailymotion.ts",
+    fetchFunction: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?dailymotion\.com\/(?<username>[a-zA-Z0-9_-]{3,30})/gi,
   },

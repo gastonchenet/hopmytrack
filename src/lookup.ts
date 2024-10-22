@@ -83,7 +83,7 @@ async function recursion(
     logger.log(
       `Recursion ${
         !options["no-color"] ? chalk.cyan(iteration + 1) : iteration + 1
-      }${!options["no-color"] ? chalk.black("/") : "/"}${
+      }${!options["no-color"] ? chalk.gray("/") : "/"}${
         !options["no-color"]
           ? chalk.cyan(lookupOptions.depth ?? "∞")
           : lookupOptions.depth ?? "Inf"
