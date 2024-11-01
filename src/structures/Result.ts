@@ -675,9 +675,7 @@ export default class Result {
                   colored ? chalk.red("!") : "!"
                 }${colored ? chalk.gray(")") : ")"}`
               : ""
-          } ${
-            colored ? chalk.underline.cyan(website.url) : website.url
-          } ${
+          } ${colored ? chalk.underline.cyan(website.url) : website.url} ${
             colored
               ? (website.prob >= Result.Prob.LIKELY
                   ? chalk.green
@@ -688,12 +686,12 @@ export default class Result {
           }${colored ? chalk.gray("%") : "%"}${
             website.fetched
               ? colored
-                ? `${chalk.gray(" (")}${chalk.green("✔ Fetched")}${chalk.gray(
+                ? `${chalk.gray(" (")}${chalk.green("✓ Fetched")}${chalk.gray(
                     ")"
                   )}`
                 : " (Fetched)"
               : colored
-              ? `${chalk.gray(" (")}${chalk.red("✘ Not Fetched")}${chalk.gray(
+              ? `${chalk.gray(" (")}${chalk.red("✗ Not Fetched")}${chalk.gray(
                   ")"
                 )}`
               : " (Not Fetched)"
