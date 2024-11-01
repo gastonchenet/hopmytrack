@@ -1,5 +1,6 @@
 node_modules/**
 output/**
 build/**
+release/**/*.exe
 bun.lockb
 *.yml

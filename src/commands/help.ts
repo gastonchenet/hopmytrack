@@ -1,16 +1,25 @@
 import chalk from "chalk";
-import tool from "../../tool.json";
+import tool from "../../package.json";
 import { optionList } from "../options";
 
 export default function help() {
   console.log(
     tool.description
-      .replace(new RegExp("HopMyTrack", "g"), chalk.magenta.bold("HopMyTrack"))
+      .replace(
+        new RegExp(tool.config.displayName, "g"),
+        chalk.magenta.bold(tool.config.displayName)
+      )
       .replace(new RegExp("OSINT", "g"), chalk.bold("OSINT"))
   );
 
   console.log(chalk.bold("\nUsage:"));
-  console.log(`  ${chalk.magenta.bold("hmt")} [...flags]`);
+  console.log(
+    `  ${chalk.magenta.bold("hmt")} ${chalk.gray(
+      "# Interactive cli"
+    )}\n  ${chalk.magenta.bold("hmt")} [...flags] ${chalk.gray(
+      "# Command line tool"
+    )}`
+  );
 
   console.log(chalk.bold("\nExamples:"));
   console.log(

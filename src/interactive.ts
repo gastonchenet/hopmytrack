@@ -1,13 +1,14 @@
 import figlet from "figlet";
 import { vice } from "gradient-string";
 import readline from "node:readline";
-import tool from "../tool.json";
+import tool from "../package.json";
 import EventEmitter from "events";
 import help from "./commands/help";
 import version from "./commands/version";
 import chalk from "chalk";
 import logger from "./util/logger";
 import lookup from "./lookup";
+import boxen from "boxen";
 
 enum InputType {
   LIST,
@@ -31,7 +32,6 @@ type Key = {
 };
 
 type Writing = {
-  id: string;
   type: InputType;
   pattern?: RegExp;
   displayMode?: DisplayMode;
@@ -46,12 +46,17 @@ type InputOptions = {
   displayMode?: DisplayMode;
 };
 
+type Control = {
+  label: string;
+  binings: { touch: string; control?: boolean; shift?: boolean }[];
+};
+
 const TAB = " ".repeat(2);
 
 const HEADER =
   "\n".repeat(2) +
   vice(
-    figlet.textSync("HopMyTrack", {
+    figlet.textSync(tool.config.displayName, {
       font: "ANSI Shadow",
     })
   ) +
@@ -59,18 +64,44 @@ const HEADER =
 
 const emitter = new EventEmitter();
 
+function controlRow(controls: Control[]) {
+  return boxen(
+    " " +
+      controls
+        .map(
+          (control) =>
+            control.binings
+              .map((binding) =>
+                chalk.bgWhite.black(
+                  " " +
+                    (binding.control ? "Ctrl+" : "") +
+                    (binding.shift ? "Shift+" : "") +
+                    binding.touch.toUpperCase() +
+                    " "
+                )
+              )
+              .join(" ") +
+            " " +
+            control.label
+        )
+        .join(" ".repeat(6)),
+    {
+      width: 180,
+      borderColor: "gray",
+    }
+  );
+}
+
 export default function interactive() {
   let writing: Writing | null = null;
   let buffer = "";
   let done = true;
 
   function input<T extends InputType>(
-    id: string,
     type: T,
     options: InputOptions = {}
   ): Promise<InputReturnType<T>> {
     writing = {
-      id,
       type,
       pattern: options.pattern,
       displayMode: options.displayMode,
@@ -79,8 +110,9 @@ export default function interactive() {
     buffer = "";
 
     return new Promise((resolve) => {
-      emitter.once(id, (data: string) => {
+      emitter.once("typingEvent", (data: string | undefined) => {
         writing = null;
+        if (data === undefined) return;
 
         switch (type) {
           case InputType.LIST:
@@ -120,53 +152,90 @@ export default function interactive() {
 
         process.stdout.write(`\r${chalk.cyan("Usernames")}${chalk.gray(":")} `);
 
-        const usernames = await input("USERNAMES", InputType.LIST, {
+        const usernames = await input(InputType.LIST, {
           pattern: /[a-z0-9_.-]/i,
           displayMode: DisplayMode.LOWERCASE,
         });
 
+        if (usernames.length < 1) {
+          process.stdout.write(chalk.gray("No usernames provided"));
+        }
+
         process.stdout.write(
-          `\r${chalk.cyan("First name")}${chalk.gray(":")} `
+          `\n\r${chalk.cyan("First name")}${chalk.gray(":")} `
         );
 
-        let firstName = await input("FIRST_NAME", InputType.STRING, {
+        let firstName = await input(InputType.STRING, {
           displayMode: DisplayMode.CAPITALIZE,
           pattern: /[a-z -]/i,
         });
+
+        if (!firstName) {
+          process.stdout.write(chalk.gray("No first name provided"));
+        }
 
         let lastName: string | null = null;
 
         if (firstName) {
           process.stdout.write(
-            `\r${chalk.cyan("Last name")}${chalk.gray(":")} `
+            `\n\r${chalk.cyan("Last name")}${chalk.gray(":")} `
           );
 
-          lastName = await input("LAST_NAME", InputType.STRING, {
+          lastName = await input(InputType.STRING, {
             displayMode: DisplayMode.CAPITALIZE,
             pattern: /[a-z -]/i,
           });
 
-          if (!lastName) firstName = null;
+          if (!lastName) {
+            process.stdout.write(chalk.gray("No last name provided"));
+            firstName = null;
+          }
         }
 
-        process.stdout.write(`\r${chalk.cyan("Location")}${chalk.gray(":")} `);
-        const location = await input("LOCATION", InputType.STRING, {
+        process.stdout.write(
+          `\n\r${chalk.cyan("Location")}${chalk.gray(":")} `
+        );
+
+        const location = await input(InputType.STRING, {
           displayMode: DisplayMode.CAPITALIZE,
         });
 
+        if (!location) {
+          process.stdout.write(chalk.gray("No location provided"));
+        }
+
         console.clear();
-        console.log(HEADER);
 
-        await lookup({
-          usernames,
-          first_name: firstName ?? undefined,
-          last_name: lastName ?? undefined,
-          location: location ?? undefined,
-        });
+        if (usernames.length < 1 && !firstName && !lastName && !location) {
+          console.log(f());
+        } else {
+          console.log(HEADER);
 
-        console.log(
-          "\nPress 'm' to return to the main menu or any other key to exit."
-        );
+          await lookup({
+            usernames,
+            first_name: firstName ?? undefined,
+            last_name: lastName ?? undefined,
+            location: location ?? undefined,
+          });
+
+          console.log(
+            "\n" +
+              controlRow([
+                {
+                  label: "Main menu",
+                  binings: [{ touch: "m" }, { touch: "z", control: true }],
+                },
+                {
+                  label: "Quit",
+                  binings: [
+                    { touch: "q" },
+                    { touch: "esc" },
+                    { touch: "c", control: true },
+                  ],
+                },
+              ])
+          );
+        }
 
         return;
       },
@@ -179,8 +248,23 @@ export default function interactive() {
         console.clear();
         console.log(HEADER);
         help();
+
         console.log(
-          "\nPress 'm' to return to the main menu or any other key to exit."
+          "\n" +
+            controlRow([
+              {
+                label: "Main menu",
+                binings: [{ touch: "m" }, { touch: "z", control: true }],
+              },
+              {
+                label: "Quit",
+                binings: [
+                  { touch: "q" },
+                  { touch: "esc" },
+                  { touch: "c", control: true },
+                ],
+              },
+            ])
         );
       },
     },
@@ -191,9 +275,24 @@ export default function interactive() {
       async action() {
         console.clear();
         console.log(HEADER);
-        version();
+        await version();
+
         console.log(
-          "\nPress 'm' to return to the main menu or any other key to exit."
+          "\n" +
+            controlRow([
+              {
+                label: "Main menu",
+                binings: [{ touch: "m" }, { touch: "z", control: true }],
+              },
+              {
+                label: "Quit",
+                binings: [
+                  { touch: "q" },
+                  { touch: "esc" },
+                  { touch: "c", control: true },
+                ],
+              },
+            ])
         );
       },
     },
@@ -213,7 +312,10 @@ export default function interactive() {
   const f = () =>
     HEADER +
     tool.description
-      .replace(new RegExp("HopMyTrack", "g"), chalk.magenta.bold("HopMyTrack"))
+      .replace(
+        new RegExp(tool.config.displayName, "g"),
+        chalk.magenta.bold(tool.config.displayName)
+      )
       .replace(new RegExp("OSINT", "g"), chalk.bold("OSINT")) +
     "\n\n" +
     actions
@@ -240,12 +342,21 @@ export default function interactive() {
   process.stdin.on("keypress", async (str: string | undefined, key: Key) => {
     if (
       key.sequence === "\u0003" ||
-      key.sequence === "\u0004" ||
-      key.name === "escape"
+      key.name === "escape" ||
+      key.name === "q"
     ) {
       process.stdout.write("\n\r\x1b[K\u001B[?25h");
       logger.log("Caught interrupt signal, exiting...");
       process.exit(1);
+    }
+
+    if (key.sequence === "\u001A") {
+      emitter.emit("typingEvent");
+      done = true;
+      console.clear();
+      console.log(f());
+
+      return;
     }
 
     if (writing) {
@@ -273,8 +384,7 @@ export default function interactive() {
           break;
 
         case "\r":
-          emitter.emit(writing.id, buffer);
-          process.stdout.write("\n");
+          emitter.emit("typingEvent", buffer);
           break;
 
         case ",":

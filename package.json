@@ -1,18 +1,54 @@
 {
   "name": "hopmytrack",
+  "config": {
+    "displayName": "HopMyTrack"
+  },
+  "description": "HopMyTrack is an OSINT (Open Source Intelligence) tool that allows you to find every social media profile of a person using known info.",
+  "keywords": [
+    "osint",
+    "social media",
+    "profile",
+    "person",
+    "info",
+    "intelligence",
+    "tool"
+  ],
+  "version": "0.1.18",
+  "author": {
+    "name": "gastonchenet",
+    "email": "contact@gastonchenet.fr",
+    "url": "https://gastonchenet.fr"
+  },
+  "homepage": "https:/github.com/gastonchenet/hopmytrack#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gastonchenet/hopmytrack.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gastonchenet/hopmytrack/issues",
+    "email": "contact@gastonchenet.fr"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/gastonchenet"
+  },
+  "private": false,
   "module": "./src/cli.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
     "@types/figlet": "^1.7.0",
-    "@types/user-agents": "^1.0.4"
+    "@types/user-agents": "^1.0.4",
+    "cross-env": "^7.0.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/HopMyTrack_win64 --icon ./assets/icon.ico && bun build --compile --target=bun-linux-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/HopMyTrack_lin64 --icon ./assets/icon.ico",
-    "start": "./build/HopMyTrack.exe",
+    "build": "bun run build:win && bun run build:lin",
+    "build:win": "bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/HopMyTrack_win64 --icon ./assets/icon.ico",
+    "build:lin": "bun build --compile --target=bun-linux-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/HopMyTrack_lin64 --icon ./assets/icon.ico",
     "dev": "bun ./src/cli.ts"
   },
   "dependencies": {
