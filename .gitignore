@@ -1,6 +1,14 @@
+# Ignore all files dependencies
 node_modules/**
+bun.lockb
+
+# Ignore all hidden files
+.release/**
+.vscode/**
+
+# Ignore all program generated files
 output/**
 build/**
-release/**/*.exe
-bun.lockb
+
+# Ignore all YAML files
 *.yml

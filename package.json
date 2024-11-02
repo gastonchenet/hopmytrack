@@ -46,9 +46,9 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "bun run build:win && bun run build:lin",
-    "build:win": "bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/HopMyTrack_win64 --icon ./assets/icon.ico",
-    "build:lin": "bun build --compile --target=bun-linux-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/HopMyTrack_lin64 --icon ./assets/icon.ico",
+    "build": "bun run build:lin && bun run build:win",
+    "build:lin": "bun build --compile --target=bun-linux-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-linux-x64 --icon ./assets/icon.ico",
+    "build:win": "bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-win-x64 --icon ./assets/icon.ico",
     "dev": "bun ./src/cli.ts"
   },
   "dependencies": {
