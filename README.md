@@ -1,8 +1,8 @@
 # HopMyTrack
 
-![HopMyTrack Banner](https://github.com/gastonchenet/hopmytrack/blob/main/assets/banner.png?raw=true)
-
 ![](https://img.shields.io/github/license/gastonchenet/hopmytrack) ![](https://img.shields.io/github/v/release/gastonchenet/hopmytrack) ![](https://img.shields.io/github/issues/gastonchenet/hopmytrack) ![](https://img.shields.io/github/issues-pr/gastonchenet/hopmytrack) ![](https://img.shields.io/github/forks/gastonchenet/hopmytrack) ![](https://img.shields.io/github/stars/gastonchenet/hopmytrack)
+
+![HopMyTrack Banner](https://github.com/gastonchenet/hopmytrack/blob/main/assets/banner.png?raw=true)
 
 `HopMyTrack` is an advanced **OSINT** (Open Source Intelligence) tool designed to help users uncover a wide range of publicly available information about individuals.
 
