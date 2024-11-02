@@ -2,7 +2,7 @@ import chalk from "chalk";
 import tool from "../../package.json";
 
 const TOOL_GIT_FILE =
-  "https://raw.githubusercontent.com/gastonchenet/hopmytrack/refs/heads/main/tool.json";
+  "https://raw.githubusercontent.com/gastonchenet/hopmytrack/refs/heads/main/package.json";
 
 export default async function version() {
   console.log(
