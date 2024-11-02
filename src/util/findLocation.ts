@@ -1,7 +1,7 @@
 import type { Location, ProbValue } from "../structures/Result";
 import Result from "../structures/Result";
+import detectCountries from "./detectCountries";
 import findInPage from "./findInPage";
-import { detect } from "country-in-text-detector";
 import unobfuscate from "./unobfuscate";
 
 function removeDuplicateCountries(probs: ProbValue<Location>[]) {
@@ -26,7 +26,7 @@ export function parseLocation(location: Location): string {
 }
 
 export function getLocation(text: string): Location {
-  const matches = detect(text);
+  const matches = detectCountries(text);
   const cityMatch = matches.find((match) => match.type === "city");
   const city = cityMatch?.name;
 
@@ -48,7 +48,7 @@ export default function findLocation(
   html = unobfuscate(html.toLowerCase());
   if (selector) html = findInPage(html, selector.toLowerCase());
 
-  const matches = detect(html);
+  const matches = detectCountries(html);
 
   const locationMatches = matches.map((match) => {
     if (match.type === "city") {
