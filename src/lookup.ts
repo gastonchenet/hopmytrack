@@ -2,7 +2,6 @@ import Result, { type SearchData } from "./structures/Result";
 import websites from "./websites";
 import fs from "fs";
 import path from "path";
-import Website from "./structures/Website";
 import logger from "./util/logger";
 import chalk from "chalk";
 import options, { allowed } from "./options";
@@ -94,15 +93,8 @@ async function recursion(
   const previousResult = result.copy();
 
   await Promise.all(
-    websites.map(async (w) => {
-      if (!w.fetchFunction) return [];
-
-      const website: Website = require(path.join(
-        __dirname,
-        w.fetchFunction
-      )).default;
-
-      if (!allowed(website.id, website.type)) return [];
+    websites.map(async ({ website }) => {
+      if (!website || !allowed(website.id, website.type)) return [];
       await website.execute(result, lookupOptions);
     })
   );

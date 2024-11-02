@@ -1,370 +1,372 @@
+import type Website from "./structures/Website";
+
 export default Object.freeze([
   {
     title: "GitHub",
     id: "github",
-    fetchFunction: "websites/github.ts",
+    website: require("./websites/github.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?github\.com\/(?<username>[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})/gi,
   },
   {
     title: "LinkedIn",
     id: "linkedin",
-    fetchFunction: null,
+    website: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/(?<username>[a-zA-Z0-9-_.]{3,100})/gi,
   },
   {
     title: "Instagram",
     id: "instagram",
-    fetchFunction: "websites/instagram.ts",
+    website: require("./websites/instagram.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?<username>[a-zA-Z0-9_.]{1,30})/gi,
   },
   {
     title: "TikTok",
     id: "tiktok",
-    fetchFunction: "websites/tiktok.ts",
+    website: require("./websites/tiktok.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@(?<username>[a-zA-Z0-9_.]{2,24})/gi,
   },
   {
     title: "Personal Website",
     id: "personal",
-    fetchFunction: "websites/personal.ts",
+    website: require("./websites/personal.ts").default as Website,
     regex: null,
   },
   {
     title: "Pornhub",
     id: "pornhub",
-    fetchFunction: "websites/pornhub.ts",
+    website: require("./websites/pornhub.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?pornhub\.com\/users\/(?<username>[a-zA-Z0-9][a-zA-Z0-9._-]{4,}[a-zA-Z0-9])/gi,
   },
   {
     title: "About.me",
     id: "aboutme",
-    fetchFunction: "websites/aboutme.ts",
+    website: require("./websites/aboutme.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?about\.me\/(?<username>[a-zA-Z][a-zA-Z0-9._-]{1,30}[a-zA-Z0-9])/gi,
   },
   {
     title: "AllMyLinks",
     id: "allmylinks",
-    fetchFunction: "websites/allmylinks.ts",
+    website: require("./websites/allmylinks.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?allmylinks\.com\/(?<username>[a-zA-Z0-9][a-zA-Z0-9._-]{0,30}[a-zA-Z0-9])/gi,
   },
   {
     title: "CodePen",
     id: "codepen",
-    fetchFunction: "websites/codepen.ts",
+    website: require("./websites/codepen.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?codepen\.io\/(?<username>[a-zA-Z0-9_-]{3,15})/gi,
   },
   {
     title: "Dribbble",
     id: "dribbble",
-    fetchFunction: "websites/dribbble.ts",
+    website: require("./websites/dribbble.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?dribbble\.com\/(?<username>[a-zA-Z][a-zA-Z0-9_-]{2,19})/gi,
   },
   {
     title: "Reddit",
     id: "reddit",
-    fetchFunction: "websites/reddit.ts",
+    website: require("./websites/reddit.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?reddit\.com\/user\/(?<username>[a-zA-Z0-9_-]{3,20})/gi,
   },
   {
     title: "Snapchat",
     id: "snapchat",
-    fetchFunction: "websites/snapchat.ts",
+    website: require("./websites/snapchat.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?snapchat\.com\/add\/(?<username>[a-zA-Z][a-zA-Z0-9]{2,14})/gi,
   },
   {
     title: "Twitch",
     id: "twitch",
-    fetchFunction: null,
+    website: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?twitch\.tv\/(?<username>[a-zA-Z0-9_]{4,25})/gi,
   },
   {
     title: "Twitter",
     id: "twitter",
-    fetchFunction: "websites/twitter.ts",
+    website: require("./websites/twitter.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/(?<username>[a-zA-Z0-9_]{1,15})/gi,
   },
   {
     title: "Behance",
     id: "behance",
-    fetchFunction: "websites/behance.ts",
+    website: require("./websites/behance.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?behance\.net\/(?<username>[a-zA-Z][a-zA-Z0-9_-]{2,19})/gi,
   },
   {
     title: "Codecademy",
     id: "codecademy",
-    fetchFunction: "websites/codecademy.ts",
+    website: require("./websites/codecademy.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?codecademy\.com\/(?<username>[a-zA-Z0-9_-]{1,256})/gi,
   },
   {
     title: "DailyMotion",
     id: "dailymotion",
-    fetchFunction: null,
+    website: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?dailymotion\.com\/(?<username>[a-zA-Z0-9_-]{3,30})/gi,
   },
   {
     title: "DeviantArt",
     id: "deviantart",
-    fetchFunction: "websites/deviantart.ts",
+    website: require("./websites/deviantart.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:(?:www|(?:[a-zA-Z0-9_-]+))\.)?deviantart\.com\/(?<username>[a-zA-Z0-9_-]+)/gi,
   },
   {
     title: "HackerRank",
     id: "hackerrank",
-    fetchFunction: "websites/hackerrank.ts",
+    website: require("./websites/hackerrank.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?hackerrank\.com\/(?<username>[a-zA-Z0-9_]{2,30})/gi,
   },
   {
     title: "Facebook",
     id: "facebook",
-    fetchFunction: null,
+    website: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?facebook\.com\/(?<username>(?!.*\.\.)(?!.*\.$)[a-zA-Z0-9._]{5,50})/gi,
   },
   {
     title: "Pinterest",
     id: "pinterest",
-    fetchFunction: null,
+    website: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?pinterest\.com\/(?<username>[a-zA-Z][a-zA-Z0-9_]{2,29})/gi,
   },
   {
     title: "SoundCloud",
     id: "soundcloud",
-    fetchFunction: "websites/soundcloud.ts",
+    website: require("./websites/soundcloud.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?soundcloud\.com\/(?<username>[a-zA-Z0-9_-]{3,40})/gi,
   },
   {
     title: "osu!",
     id: "osu",
-    fetchFunction: "websites/osu.ts",
+    website: require("./websites/osu.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?osu\.ppy\.sh\/users\/(?<username>[a-zA-Z0-9_-]{2,15})/gi,
   },
   {
     title: "MyAnimeList",
     id: "myanimelist",
-    fetchFunction: "websites/myanimelist.ts",
+    website: require("./websites/myanimelist.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?myanimelist\.net\/profile\/(?<username>[a-zA-Z0-9_]{3,20})/gi,
   },
   {
     title: "Scratch",
     id: "scratch",
-    fetchFunction: "websites/scratch.ts",
+    website: require("./websites/scratch.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?scratch\.mit\.edu\/users\/(?<username>[a-zA-Z][a-zA-Z0-9_-]{2,19})/gi,
   },
   {
     title: "Spotfiy",
     id: "spotify",
-    fetchFunction: "websites/spotify.ts",
+    website: require("./websites/spotify.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?open\.spotify\.com\/user\/(?<username>[a-zA-Z0-9][a-zA-Z0-9._-]{2,29})/gi,
   },
   {
     title: "Steam",
     id: "steam",
-    fetchFunction: null,
+    website: null,
     regex:
       /(?:https?:\/\/)?(?:www\.)?steamcommunity\.com\/id\/(?<username>[a-zA-Z0-9_-]{3,32})/gi,
   },
   {
     title: "VirusTotal",
     id: "virustotal",
-    fetchFunction: "websites/virustotal.ts",
+    website: require("./websites/virustotal.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?virustotal\.com\/gui\/user\/(?<username>[a-zA-Z0-9_-]{3,32})/gi,
   },
   {
     title: "Wattpad",
     id: "wattpad",
-    fetchFunction: "websites/wattpad.ts",
+    website: require("./websites/wattpad.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?wattpad\.com\/user\/(?<username>(?![_-])[a-zA-Z0-9_-]{6,20}(?<![_-]))/gi,
   },
   {
     title: "XHamster",
     id: "xhamster",
-    fetchFunction: "websites/xhamster.ts",
+    website: require("./websites/xhamster.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?xhamster\.com\/users\/(?<username>[a-zA-Z0-9][a-zA-Z0-9._-]{4,}[a-zA-Z0-9])/gi,
   },
   {
     title: "XVideos",
     id: "xvideos",
-    fetchFunction: "websites/xvideos.ts",
+    website: require("./websites/xvideos.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?xvideos\.com\/profile\/(?<username>[a-zA-Z0-9_-]{3,30})/gi,
   },
   {
     title: "NPM",
     id: "npm",
-    fetchFunction: "websites/npm.ts",
+    website: require("./websites/npm.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?npmjs\.com\/~(?<username>(?!-)(?!.*--)[a-z0-9_-]{1,214}(?<!-))/gi,
   },
   {
     title: "Last.fm",
     id: "lastfm",
-    fetchFunction: "websites/lastfm.ts",
+    website: require("./websites/lastfm.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?last\.fm\/user\/(?<username>[a-zA-Z0-9][a-zA-Z0-9._-]{1,14})/gi,
   },
   {
     title: "BodySpace",
     id: "bodyspace",
-    fetchFunction: "websites/bodyspace.ts",
+    website: require("./websites/bodyspace.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?bodyspace\.bodybuilding\.com\/(?<username>(?![_.-])[a-zA-Z0-9_-]{3,30}(?<![_-]))/gi,
   },
   {
     title: "Flickr",
     id: "flickr",
-    fetchFunction: "websites/flickr.ts",
+    website: require("./websites/flickr.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?flickr\.com\/people\/(?<username>[a-zA-Z0-9._-]{3,30})/gi,
   },
   {
     title: "Imgur",
     id: "imgur",
-    fetchFunction: "websites/imgur.ts",
+    website: require("./websites/imgur.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?imgur\.com\/user\/(?<username>[a-zA-Z][a-zA-Z0-9_]{2,29})/gi,
   },
   {
     title: "Itch.io",
     id: "itchio",
-    fetchFunction: "websites/itchio.ts",
+    website: require("./websites/itchio.ts").default as Website,
     regex: /(?:https?:\/\/)?(?:www\.)?itch\.io\/(?<username>[a-zA-Z0-9@_-]+)/gi,
   },
   {
     title: "Kick",
     id: "kick",
-    fetchFunction: "websites/kick.ts",
+    website: require("./websites/kick.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?kick\.com\/(?<username>(?![_.-])[a-zA-Z0-9_-]{3,30}(?<![_-]))/gi,
   },
   {
     title: "eBay",
     id: "ebay",
-    fetchFunction: "websites/ebay.ts",
+    website: require("./websites/ebay.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?ebay\.com\/usr\/(?<username>(?![_.-])[a-zA-Z0-9._-]{6,64}(?<![_-]))/gi,
   },
   {
     title: "MCName",
     id: "mcname",
-    fetchFunction: "websites/mcname.ts",
+    website: require("./websites/mcname.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?mcname\.info\/en\/search\?q=(?<username>[a-zA-Z0-9][a-zA-Z0-9_]{1,14}[a-zA-Z0-9])/gi,
   },
   {
     title: "YouTube",
     id: "youtube",
-    fetchFunction: "websites/youtube.ts",
+    website: require("./websites/youtube.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:(?:c\/|channel\/|user\/)|)(?<username>[a-zA-Z0-9_-]{1,256})/gi,
   },
   {
     title: "Vimeo",
     id: "vimeo",
-    fetchFunction: "websites/vimeo.ts",
+    website: require("./websites/vimeo.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(?<username>[a-zA-Z0-9][a-zA-Z0-9_-]{1,28}[a-zA-Z0-9])/gi,
   },
   {
     title: "Slack",
     id: "slack",
-    fetchFunction: "websites/slack.ts",
+    website: require("./websites/slack.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?slack\.com\/(?<username>[a-z0-9][a-z0-9._]{1,19}[a-z0-9])/gi,
   },
   {
     title: "GitLab",
     id: "gitlab",
-    fetchFunction: "websites/gitlab.ts",
+    website: require("./websites/gitlab.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?gitlab\.com\/(?<username>[a-zA-Z0-9_\-\.]{2,255})/gi,
   },
   {
     title: "Product Hunt",
     id: "producthunt",
-    fetchFunction: "websites/producthunt.ts",
+    website: require("./websites/producthunt.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?producthunt\.com\/(?<username>[a-zA-Z0-9_]{1,20})/gi,
   },
   {
     title: "Trello",
     id: "trello",
-    fetchFunction: "websites/trello.ts",
+    website: require("./websites/trello.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?trello\.com\/(?<username>[a-zA-Z0-9_\-]{1,100})/gi,
   },
   {
     title: "Xbox Gamertag",
     id: "xboxgamertag",
-    fetchFunction: "websites/xboxgamertag.ts",
+    website: require("./websites/xboxgamertag.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?xboxgamertag\.com\/search\/(?<username>[a-zA-Z0-9]{1,15})/gi,
   },
   {
     title: "Lichess",
     id: "lichess",
-    fetchFunction: "websites/lichess.ts",
+    website: require("./websites/lichess.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?lichess\.org\/@\/(?<username>[a-zA-Z0-9][a-zA-Z0-9_-]{1,19})/gi,
   },
   {
     title: "Chess.com",
     id: "chesscom",
-    fetchFunction: "websites/chesscom.ts",
+    website: require("./websites/chesscom.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?chess\.com\/member\/(?<username>[a-zA-Z0-9][a-zA-Z0-9_]{2,19})/gi,
   },
   {
     title: "Tetr.io",
     id: "tetrio",
-    fetchFunction: "websites/tetrio.ts",
+    website: require("./websites/tetrio.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?(?:ch\.)?tetr\.io\/u\/(?<username>[a-zA-Z0-9_]{3,15})/gi,
   },
   {
     title: "Replit",
     id: "replit",
-    fetchFunction: "websites/replit.ts",
+    website: require("./websites/replit.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?replit\.com\/@(?<username>[a-zA-Z0-9_]{3,20})/gi,
   },
   {
     title: "Erome",
     id: "erome",
-    fetchFunction: "websites/erome.ts",
+    website: require("./websites/erome.ts").default as Website,
     regex:
       /(?:https?:\/\/)?(?:www\.)?erome\.com\/(?<username>[a-zA-Z0-9_]{3,20})/gi,
   },
   {
     title: "Telegram",
     id: "telegram",
-    fetchFunction: null,
+    website: null,
     regex: /(?:https?:\/\/)?(?:www\.)?t\.me\/(?<username>[a-zA-Z0-9_]{5,32})/gi,
   },
 ]);
