@@ -1,39 +1,51 @@
 #!/usr/bin/env bash
 
-cd $(dirname $0)/..
 # Navigate to the parent directory of the script's location.
+cd $(dirname $0)/..
 
-file_name=hopmytrack-linux-x64
-github_repo=https://github.com/gastonchenet/hopmytrack
-hmt_uri=$github_repo/releases/latest/download/$file_name
-# Define variables for the file name, GitHub repository, and download URL.
+# Initializing variables
+hmt_root=HMT_INSTALL
+hmt_root=${!hmt_root:-$HOME/.hmt}
+hmt_path=$hmt_root/hmt.zip
 
-install_env=HMT_INSTALL
-bin_env=\$$install_env/bin
-# Set environment variables for the install path and binary directory.
+file_name=hopmytrack-lin-x64
+url=https://github.com/gastonchenet/hopmytrack/releases/latest/download/$file_name.zip
 
-install_dir=${!install_env:-$HOME/.hmt}
-bin_dir=$install_dir/bin
-exe=$bin_dir/hmt
-# Define paths for the installation and executable.
+# Rebuilding the path to the executable
+if [ -f $hmt_root ]; then rm -rf $hmt_root; fi
+mkdir -p $hmt_root/bin ||
+  error "Failed to create directory \"$hmt_root\""
 
-# Create bin directory if it doesn’t exist
-if [[ ! -d $bin_dir ]]; then
-  mkdir -p "$bin_dir" || error "Failed to create install directory \"$bin_dir\""
-fi
+# Downloading the executable with curl
+curl --fail --location --progress-bar -o $hmt_path $url ||
+  error "Failed to download HopMyTrack from \"$url\""
 
-# Download HopMyTrack executable
-curl --fail --location --progress-bar -o $exe $hmt_uri || error "Failed to download HopMyTrack from \"$hmt_uri\""
+# Extracting the executable from the archive
+command -v unzip > /dev/null ||
+  error "Unzip is not installed. Please install it and try again."
 
-# Make it executable
-chmod +x $exe || error "Failed to set permissions on HopMyTrack executable"
+unzip -q $hmt_path -d $hmt_root ||
+  error "Failed to extract HopMyTrack to \"$hmt_root\""
 
-echo "HopMyTrack has been installed successfully!"
+# Renaming the executable
+mv $hmt_root/$file_name $hmt_root/bin/hmt ||
+  error "Failed to rename HopMyTrack executable" 
 
-# Add bin directory to PATH if not present
-if ! grep -q "$bin_dir" <<< "$PATH"; then
+# Removing the archive
+rm $hmt_path ||
+  error "Failed to remove HopMyTrack archive"
+
+# Setting permissions on the executable
+chmod +x $hmt_root/bin/hmt ||
+  error "Failed to set permissions on HopMyTrack executable"
+
+# Adding the executable to the PATH
+if ! grep -q $hmt_root/bin <<< $PATH; then
+  export PATH="$PATH:$hmt_root/bin"
+
   echo "" >> "$HOME/.bashrc"
   echo "# HopMyTrack" >> "$HOME/.bashrc"
-  echo "export PATH=\"\$PATH:$bin_dir\"" >> "$HOME/.bashrc"
+  echo "export PATH=\"\$PATH:$hmt_root/bin\"" >> "$HOME/.bashrc"
+
   echo "Please restart your terminal or run \"source ~/.bashrc\""
 fi

@@ -9,6 +9,7 @@ bun.lockb
 # Ignore all program generated files
 output/**
 build/**
+tmp/**
 
 # Ignore all YAML files
 *.yml

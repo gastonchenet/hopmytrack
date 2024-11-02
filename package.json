@@ -13,7 +13,7 @@
     "intelligence",
     "tool"
   ],
-  "version": "0.1.18",
+  "version": "0.1.19",
   "author": {
     "name": "gastonchenet",
     "email": "contact@gastonchenet.fr",
@@ -46,10 +46,14 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "bun run build:lin && bun run build:win",
-    "build:lin": "bun build --compile --target=bun-linux-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-linux-x64 --icon ./assets/icon.ico",
-    "build:win": "bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-win-x64 --icon ./assets/icon.ico",
-    "dev": "bun ./src/cli.ts"
+    "build": "bun run build:lin:x64 && bun run build:lin:aarch64 && bun run build:dar:x64 && bun run build:dar:aarch64 && bun run build:win:x64",
+    "build:lin:x64": "bun build --compile --target=bun-linux-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-lin-x64 --icon ./assets/icon.ico",
+    "build:lin:aarch64": "bun build --compile --target=bun-linux-arm64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-lin-aarch64 --icon ./assets/icon.ico",
+    "build:dar:x64": "bun build --compile --target=bun-darwin-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-dar-x64 --icon ./assets/icon.ico",
+    "build:dar:aarch64": "bun build --compile --target=bun-darwin-arm64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-dar-aarch64 --icon ./assets/icon.ico",
+    "build:win:x64": "bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-win-x64 --icon ./assets/icon.ico",
+    "dev": "bun run ./src/cli.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "boxen": "^8.0.1",

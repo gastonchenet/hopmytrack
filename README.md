@@ -1,53 +1,84 @@
 # HopMyTrack
 
-HopMyTrack is an advanced OSINT (Open Source Intelligence) tool designed to help users uncover a wide range of publicly available information about individuals. This powerful platform combines data from various online sources to provide comprehensive profiles that may include social media activity, public records, and other relevant digital footprints. With an intuitive interface, HopMyTrack enables users to efficiently search by name, email, or phone number, making it an invaluable resource for researchers, security professionals, and anyone needing detailed insights into a person's online presence. The tool's robust analytics also offer trend analysis and behavior prediction, making it a cutting-edge solution in the realm of digital investigation.
+![](https://img.shields.io/github/license/gastonchenet/hopmytrack) ![](https://img.shields.io/github/v/release/gastonchenet/hopmytrack) ![](https://img.shields.io/github/issues/gastonchenet/hopmytrack) ![](https://img.shields.io/github/issues-pr/gastonchenet/hopmytrack) ![](https://img.shields.io/github/forks/gastonchenet/hopmytrack) ![](https://img.shields.io/github/stars/gastonchenet/hopmytrack)
 
-## Compile the cli
+`HopMyTrack` is an advanced **OSINT** (Open Source Intelligence) tool designed to help users uncover a wide range of publicly available information about individuals.
+
+It uses a variety of techniques to gather data from various sources, including social media platforms, public records, and other online resources.
+
+## Table of Contents
+
+- [Installation](#installation)
+  - [Linux & MacOS](#linux--macos)
+  - [Windows](#windows)
+- [Usage](#usage)
+  - [Command Lines](#command-lines)
+  - [Interactive Mode](#interactive-mode)
+- [Features](#features)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Installation
+
+`HopMyTrack` is available for Linux (x64), MacOS (x64), and Windows (x64). You can install it using the following commands:
+
+### Linux & MacOS
+
+**Requirements:** `curl` and `unzip`
+
+> Kernel version 5.6 or higher is strongly recommended, but the minimum is 5.1.
 
 ```bash
-bun build ./cli.ts --compile --outfile ./build/HopMyTrack
+curl -fsSL https://gastonchenet.fr/hopmytrack/install.sh | bash
+```
+
+### Windows
+
+```bash
+powershell -c "irm https://gastonchenet.fr/hopmytrack/install.ps1 | iex"
 ```
 
 ## Usage
 
-Every util commands
+There are two ways to use HopMyTrack:
 
-### Help command
+### Command Lines
 
-_To get help on how to use HopMyTrack._
-
-```bash
-./HopMyTrack --help
-```
-
-### Enable NSFW
-
-_To enable tracking on NSFW websites_
+You can use HopMyTrack from the command line if you want to use it as a standalone tool. The following command will search for information about a person named _John Doe_ and save the results to a file called **output.txt**:
 
 ```bash
-./HopMyTrack --nsfw
+hmt --input "username:john_doe;first_name:John;last_name:Doe" --verbose --output "output.txt"
 ```
 
-### Enable colors
+### Interactive Mode
 
-_To enable logs with colors_
+You can also use HopMyTrack in interactive mode, which provides a more user-friendly experience. Simply run the following command and follow the prompts:
+
+> Note: The interactive mode may not be available on all platforms.
 
 ```bash
-./HopMyTrack --colors
+hmt
 ```
 
-### Enable colors
+## Features
 
-_To enable real-time logs_
+`HopMyTrack` offers a wide range of features, including:
 
 ```bash
-./HopMyTrack --verbose
+hmt                                    # Run HopMyTrack in interactive mode (if available)
+
+hmt --help                             # Display the help message
+hmt --version                          # Display the version number
+
+hmt --input <input> --depth <depth>    # Set the search depth
+hmt --input <input> --proxy <proxy>    # Use a proxy server
+hmt --input <input> --verbose          # Display verbose output
 ```
 
-### Output file
+## Contributing
 
-_To add an output file with the found information_
+Refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file for more information on how to contribute to this project.
 
-```bash
-./HopMyTrack --output=./path/to/file.txt
-```
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
