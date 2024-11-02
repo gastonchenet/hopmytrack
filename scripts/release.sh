@@ -17,7 +17,7 @@ function zip_build {
   local plat=$1
   local arch=$2
 
-  # bun run build:$plat
+  bun run build:$plat:$arch
 
   if [[ $plat = "win" ]]; then
     zip -j $release_dir/hopmytrack-$plat-$arch.zip ./build/hopmytrack-$plat-$arch.exe ./scripts/uninstall.ps1
