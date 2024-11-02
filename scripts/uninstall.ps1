@@ -2,8 +2,7 @@
 try {
   Remove-Item "$PSScriptRoot\bin\hmt.exe" -Force
 } catch {
-  Write-Host $_
-  Write-Host "`n`nCould not delete $PSScriptRoot\bin\hmt.exe."
+  Write-Host "Could not delete $PSScriptRoot\bin\hmt.exe."
   Write-Host "Please close all instances of hmt.exe and try again."
   
   exit 1
@@ -13,6 +12,8 @@ try {
   Remove-Item $PSScriptRoot -Recurse -Force
 } catch {
   Write-Host "Could not delete $PSScriptRoot."
+  Write-Host "Please close all instances of hmt.exe and try again."
+
   exit 1
 }
 
