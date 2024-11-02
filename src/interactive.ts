@@ -1,4 +1,3 @@
-import figlet from "figlet";
 import { vice } from "gradient-string";
 import readline from "node:readline";
 import tool from "../package.json";
@@ -56,11 +55,14 @@ const TAB = " ".repeat(2);
 const HEADER =
   "\n".repeat(2) +
   vice(
-    figlet.textSync(tool.config.displayName, {
-      font: "ANSI Shadow",
-    })
+    `██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██╗   ██╗████████╗██████╗  █████╗  ██████╗██╗  ██╗
+██║  ██║██╔═══██╗██╔══██╗████╗ ████║╚██╗ ██╔╝╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██║ ██╔╝
+███████║██║   ██║██████╔╝██╔████╔██║ ╚████╔╝    ██║   ██████╔╝███████║██║     █████╔╝ 
+██╔══██║██║   ██║██╔═══╝ ██║╚██╔╝██║  ╚██╔╝     ██║   ██╔══██╗██╔══██║██║     ██╔═██╗ 
+██║  ██║╚██████╔╝██║     ██║ ╚═╝ ██║   ██║      ██║   ██║  ██║██║  ██║╚██████╗██║  ██╗
+╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝     ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝`
   ) +
-  "\n";
+  "\n\n";
 
 const emitter = new EventEmitter();
 
