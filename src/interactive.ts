@@ -6,8 +6,9 @@ import help from "./commands/help";
 import version from "./commands/version";
 import chalk from "chalk";
 import logger from "./util/logger";
-import lookup from "./lookup";
+import lookup, { FETCHING_MESSAGES, SPINNER_CHARS } from "./lookup";
 import boxen from "boxen";
+import events, { EventType } from "./events";
 
 enum InputType {
   LIST,
@@ -21,14 +22,6 @@ enum DisplayMode {
   CAPITALIZE,
   PASSWORD,
 }
-
-type Key = {
-  sequence: string;
-  name: string;
-  ctrl: boolean;
-  meta: boolean;
-  shift: boolean;
-};
 
 type Writing = {
   type: InputType;
@@ -45,9 +38,28 @@ type InputOptions = {
   displayMode?: DisplayMode;
 };
 
+type Key = {
+  sequence: string;
+  name: string;
+  ctrl: boolean;
+  meta: boolean;
+  shift: boolean;
+};
+
+type Touch = {
+  touch: string;
+  control?: boolean;
+  shift?: boolean;
+};
+
+type Binding = {
+  keys: Touch[];
+  action: () => Promise<any>;
+};
+
 type Control = {
   label: string;
-  binings: { touch: string; control?: boolean; shift?: boolean }[];
+  binings: Touch[];
 };
 
 const TAB = " ".repeat(2);
@@ -66,7 +78,7 @@ const HEADER =
 
 const emitter = new EventEmitter();
 
-function controlRow(controls: Control[]) {
+function makeControlRow(controls: Control[]) {
   return boxen(
     " " +
       controls
@@ -98,6 +110,7 @@ export default function interactive() {
   let writing: Writing | null = null;
   let buffer = "";
   let done = true;
+  let activeBindings: Binding[] = [];
 
   function input<T extends InputType>(
     type: T,
@@ -112,7 +125,7 @@ export default function interactive() {
     buffer = "";
 
     return new Promise((resolve) => {
-      emitter.once("typingEvent", (data: string | undefined) => {
+      events.once(EventType.TypingEvent, (data) => {
         writing = null;
         if (data === undefined) return;
 
@@ -212,31 +225,146 @@ export default function interactive() {
           console.log(f());
         } else {
           console.log(HEADER);
+          console.log("\n");
 
-          await lookup({
-            usernames,
-            first_name: firstName ?? undefined,
-            last_name: lastName ?? undefined,
-            location: location ?? undefined,
-          });
+          const message =
+            FETCHING_MESSAGES[
+              Math.floor(Math.random() * FETCHING_MESSAGES.length)
+            ];
 
-          console.log(
-            "\n" +
-              controlRow([
-                {
-                  label: "Main menu",
-                  binings: [{ touch: "m" }, { touch: "z", control: true }],
-                },
-                {
-                  label: "Quit",
-                  binings: [
-                    { touch: "q" },
-                    { touch: "esc" },
-                    { touch: "c", control: true },
-                  ],
-                },
-              ])
+          let count = 0;
+          let recursion = 0;
+          let progress = 0;
+
+          const updateProgressBar = (newRecursion: boolean) => {
+            const progressLength = 60;
+            const progressPercentage = (progress / count) * 100;
+
+            const progressBar = "█".repeat(
+              Math.floor((progressPercentage * progressLength) / 100)
+            );
+
+            const progressEmpty = "█".repeat(
+              progressLength - progressBar.length
+            );
+
+            process.stdout.write(
+              `\u001b[2A\r${" ".repeat(process.stdout.columns)}\r${chalk.cyan(
+                SPINNER_CHARS[Math.floor(Date.now() / 100) % 10]
+              )} ${message}`
+            );
+
+            process.stdout.write(
+              `\n\n${
+                newRecursion ? `\r${" ".repeat(process.stdout.columns)}\r` : ""
+              }Depth${chalk.gray(":")} ${chalk.cyan(
+                recursion.toLocaleString("en")
+              )} ${chalk.cyan(progressBar)}${chalk.gray(
+                progressEmpty
+              )} ${progress.toLocaleString("en")}${chalk.gray(
+                "/"
+              )}${count.toLocaleString("en")} ${chalk.gray(
+                "("
+              )}${progressPercentage.toLocaleString("en", {
+                maximumFractionDigits: 1,
+                minimumFractionDigits: 1,
+              })}%${chalk.gray(")")}\u001B[?25l`
+            );
+          };
+
+          const updateRecursion = () => {
+            recursion++;
+            count = 0;
+            progress = 0;
+            updateProgressBar(true);
+          };
+
+          const updateCount = (c: number) => {
+            count += c;
+            updateProgressBar(false);
+          };
+
+          const updateProgress = () => {
+            progress++;
+            updateProgressBar(false);
+          };
+
+          const spinnerInterval = setInterval(updateProgressBar, 100, false);
+
+          events.on(EventType.Recursion, updateRecursion);
+          events.on(EventType.FetchingReady, updateCount);
+          events.on(EventType.WebsiteFetched, updateProgress);
+
+          const result = await lookup(
+            {
+              usernames,
+              first_name: firstName ?? undefined,
+              last_name: lastName ?? undefined,
+              location: location ?? undefined,
+            },
+            { hide: true }
           );
+
+          clearInterval(spinnerInterval);
+
+          events.off(EventType.Recursion, updateRecursion);
+          events.off(EventType.FetchingReady, updateCount);
+          events.off(EventType.WebsiteFetched, updateProgress);
+
+          const path =
+            (result.likely.usernames[0].value ??
+              result.likely.firstName?.value ??
+              "unknown") + ".txt";
+
+          const controlRow =
+            "\n" +
+            makeControlRow([
+              {
+                label: `Save to '${path}'`,
+                binings: [{ touch: "o" }, { touch: "s", control: true }],
+              },
+              {
+                label: "Main menu",
+                binings: [{ touch: "m" }, { touch: "z", control: true }],
+              },
+              {
+                label: "Quit",
+                binings: [
+                  { touch: "q" },
+                  { touch: "esc" },
+                  { touch: "c", control: true },
+                ],
+              },
+            ]);
+
+          activeBindings = [
+            {
+              keys: [{ touch: "o" }, { touch: "s", control: true }],
+              async action() {
+                console.clear();
+                console.log(HEADER);
+
+                const file = Bun.file(path);
+                const writer = file.writer();
+
+                writer.write(result.toString());
+                writer.end();
+
+                console.log(
+                  `Data successfully written to ${chalk.cyan(path)}.`
+                );
+
+                setTimeout(() => {
+                  console.clear();
+                  console.log(HEADER);
+                  console.log(result.toString(true));
+                  console.log(controlRow);
+                }, 2000);
+              },
+            },
+          ];
+
+          console.log(controlRow);
         }
 
         return;
@@ -253,7 +381,7 @@ export default function interactive() {
 
         console.log(
           "\n" +
-            controlRow([
+            makeControlRow([
               {
                 label: "Main menu",
                 binings: [{ touch: "m" }, { touch: "z", control: true }],
@@ -281,7 +409,7 @@ export default function interactive() {
 
         console.log(
           "\n" +
-            controlRow([
+            makeControlRow([
               {
                 label: "Main menu",
                 binings: [{ touch: "m" }, { touch: "z", control: true }],
@@ -341,7 +469,7 @@ export default function interactive() {
   readline.emitKeypressEvents(process.stdin);
   process.stdin.setRawMode(true);
 
-  process.stdin.on("keypress", async (str: string | undefined, key: Key) => {
+  process.stdin.on("keypress", (str: string | undefined, key: Key) => {
     if (
       key.sequence === "\u0003" ||
       key.name === "escape" ||
@@ -353,12 +481,32 @@ export default function interactive() {
     }
 
     if (key.sequence === "\u001A") {
-      emitter.emit("typingEvent");
+      emitter.emit(EventType.TypingEvent);
       done = true;
+      activeBindings = [];
+
       console.clear();
       console.log(f());
 
       return;
+    }
+
+    for (const binding of activeBindings) {
+      if (
+        binding.keys.some((touch) => {
+          if (touch.control && !key.ctrl) return false;
+          if (touch.shift && !key.shift) return false;
+          return key.name === touch.touch;
+        })
+      ) {
+        process.stdout.write("\u001B[?25l");
+
+        binding.action().then(() => {
+          process.stdout.write("\u001B[?25l");
+        });
+
+        return;
+      }
     }
 
     if (writing) {
@@ -386,7 +534,7 @@ export default function interactive() {
           break;
 
         case "\r":
-          emitter.emit("typingEvent", buffer);
+          events.emit(EventType.TypingEvent, buffer);
           break;
 
         case ",":
@@ -465,15 +613,21 @@ export default function interactive() {
 
     if (key.name === "return" && done) {
       done = false;
-      await actions.find((action) => action.hovering)?.action();
-      done = true;
-      process.stdout.write("\u001B[?25l");
+
+      actions
+        .find((action) => action.hovering)
+        ?.action()
+        ?.then(() => {
+          done = true;
+          process.stdout.write("\u001B[?25l");
+        });
 
       return;
     }
 
     if (key.name === "m") {
       done = true;
+      activeBindings = [];
       console.clear();
       console.log(f());
 

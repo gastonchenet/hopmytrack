@@ -6,16 +6,18 @@ import logger from "./util/logger";
 import chalk from "chalk";
 import options, { allowed } from "./options";
 import verifyProxy from "./util/verifyProxy";
+import events, { EventType } from "./events";
 
 export type LookupOptions = {
   depth?: number | null;
   log?: boolean;
   derivateUsername?: boolean;
+  hide?: boolean;
 };
 
-const SPINNER_CHARS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+export const SPINNER_CHARS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
-const FETCHING_MESSAGES = [
+export const FETCHING_MESSAGES = [
   "Sniffin' the web for you",
   "Sending my gobelins to fetch the data",
   "Looking for the data in the dark web",
@@ -29,27 +31,27 @@ let interval: Timer | null = null;
 const message =
   FETCHING_MESSAGES[Math.floor(Math.random() * FETCHING_MESSAGES.length)];
 
-function handleResult(result: Result, lookupOptions: LookupOptions) {
+async function handleResult(result: Result, lookupOptions: LookupOptions) {
   if (interval) clearInterval(interval);
   process.stdout.write("\r\x1b[K\u001B[?25h");
+
   if (options.verbose && lookupOptions.log) console.log();
   if (lookupOptions.log) logger.writeResult(result);
 
   if (options.output) {
-    const outFile = path.join(process.cwd(), options.output);
-    const outDir = path.dirname(outFile);
+    const outDir = path.dirname(options.output);
 
     if (!fs.existsSync(outDir)) {
       fs.mkdirSync(outDir, { recursive: true });
     }
 
-    fs.writeFileSync(outFile, result.toString());
+    fs.writeFileSync(options.output, result.toString());
 
     if (options.verbose && lookupOptions.log) {
       logger.log(
         !options["no-color"]
-          ? chalk.green(`Data successfully written to '${outFile}'`)
-          : `Data successfully written to '${outFile}'`
+          ? chalk.green(`Data successfully written to '${options.output}'`)
+          : `Data successfully written to '${options.output}'`
       );
     }
   }
@@ -62,7 +64,14 @@ async function recursion(
   lookupOptions: LookupOptions = {},
   iteration = 0
 ) {
-  if (!options.verbose && lookupOptions.log && iteration === 0) {
+  events.emit(EventType.Recursion);
+
+  if (
+    !lookupOptions.hide &&
+    !options.verbose &&
+    lookupOptions.log &&
+    iteration === 0
+  ) {
     interval = setInterval(() => {
       process.stdout.write(
         `${
@@ -74,11 +83,15 @@ async function recursion(
     }, 100);
   }
 
-  if (!!lookupOptions.depth && iteration >= lookupOptions.depth) {
+  if (
+    !lookupOptions.hide &&
+    !!lookupOptions.depth &&
+    iteration >= lookupOptions.depth
+  ) {
     return handleResult(result, lookupOptions);
   }
 
-  if (options.verbose && lookupOptions.log) {
+  if (!lookupOptions.hide && options.verbose && lookupOptions.log) {
     logger.log(
       `Recursion ${
         !options["no-color"] ? chalk.cyan(iteration + 1) : iteration + 1
@@ -120,6 +133,7 @@ export default async function lookup(
   lookupOptions.depth = lookupOptions.depth ?? options.depth;
   lookupOptions.log = lookupOptions.log ?? true;
   lookupOptions.derivateUsername = lookupOptions.derivateUsername ?? true;
+  lookupOptions.hide = lookupOptions.hide ?? false;
 
   const result = await recursion(
     await Result.fromSearchData(searchData),

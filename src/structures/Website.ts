@@ -12,6 +12,7 @@ import findUrls from "../util/findUrls";
 import fetch, { type FetchOptions } from "../util/fetch";
 import chalk from "chalk";
 import type { LookupOptions } from "../lookup";
+import events, { EventType } from "../events";
 
 enum ErrorType {
   STATUS_CODE,
@@ -123,14 +124,15 @@ export default class Website {
       actions,
       async (previousResult, lookupOptions) => {
         const results: Result[] = [];
-
-        let usernames: ProbValue<string>[] = [];
+        let usernames: ProbValue<string>[];
 
         if (lookupOptions.derivateUsername) {
           usernames = makeUsernames(previousResult, json.usernameOptions);
         } else {
           usernames = [previousResult.username!];
         }
+
+        events.emit(EventType.FetchingReady, usernames.length);
 
         for (const username of usernames) {
           const requestUrl = json.requestUrl.replace(
@@ -146,6 +148,9 @@ export default class Website {
           if (!json.disableProxy && options.proxy) init.proxy = options.proxy;
 
           const response = await fetch(requestUrl, init);
+
+          events.emit(EventType.WebsiteFetched);
+
           if (response.status === 408) continue;
 
           if (!response.ok) {
