@@ -100,7 +100,7 @@ function makeControlRow(controls: Control[]) {
         )
         .join(" ".repeat(6)),
     {
-      width: 180,
+      width: Math.min(process.stdout.columns, 120),
       borderColor: "gray",
     }
   );
