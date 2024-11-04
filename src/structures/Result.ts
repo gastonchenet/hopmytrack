@@ -629,7 +629,7 @@ export default class Result {
               `${colored ? chalk.cyan(e.value) : e.value}${
                 e.verified
                   ? `${colored ? chalk.gray(" (") : " ("}${
-                      colored ? chalk.green("✔ Valid SMTP") : "Valid SMTP"
+                      colored ? chalk.green("✓ Valid SMTP") : "Valid SMTP"
                     }${colored ? chalk.gray(")") : ")"}`
                   : ""
               } ${

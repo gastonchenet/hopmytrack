@@ -3,13 +3,14 @@ import os from "node:os";
 import logger from "../util/logger";
 import { TOOL_GIT_FILE } from "./version";
 import tool from "../../package.json";
+import chalk from "chalk";
 
 export default async function update() {
   const response = await fetch(TOOL_GIT_FILE);
   const json = await response.json();
 
   if (json.version === tool.version) {
-    logger.log("Already up to date");
+    logger.log(chalk.green("✓") + " Already up to date");
     process.exit(0);
   }
 
@@ -27,6 +28,7 @@ export default async function update() {
     case "linux":
       result =
         await $`curl -fsSL https://gastonchenet.fr/hopmytrack/install.sh | bash`;
+
       break;
 
     default:
