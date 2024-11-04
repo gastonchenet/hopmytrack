@@ -1,8 +1,19 @@
 import { $, type ShellOutput } from "bun";
 import os from "node:os";
 import logger from "../util/logger";
+import { TOOL_GIT_FILE } from "./version";
+import tool from "../../package.json";
 
 export default async function update() {
+  const response = await fetch(TOOL_GIT_FILE);
+  const json = await response.json();
+
+  if (json.version === tool.version) {
+    logger.log("Already up to date");
+    process.exit(0);
+  }
+
+  logger.log("Updating hopmytrack...");
   let result: ShellOutput;
 
   switch (os.platform()) {

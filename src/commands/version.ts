@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import tool from "../../package.json";
 
-const TOOL_GIT_FILE =
+export const TOOL_GIT_FILE =
   "https://raw.githubusercontent.com/gastonchenet/hopmytrack/refs/heads/main/package.json";
 
 type Result = {
