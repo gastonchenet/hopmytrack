@@ -4,7 +4,11 @@ import tool from "../../package.json";
 const TOOL_GIT_FILE =
   "https://raw.githubusercontent.com/gastonchenet/hopmytrack/refs/heads/main/package.json";
 
-export default async function version() {
+type Result = {
+  update: boolean;
+};
+
+export default async function version(): Promise<Result> {
   console.log(
     tool.config.displayName +
       " version" +
@@ -18,13 +22,18 @@ export default async function version() {
 
   if (json.version !== tool.version) {
     console.log(
-      chalk.italic(
-        `${chalk.gray(
-          `A new version of ${tool.config.displayName} is available (`
-        )}${chalk.red(tool.version)}${chalk.gray(" -> ")}${chalk.green(
-          json.version
-        )}${chalk.gray(")")}`
-      )
+      "\n" +
+        chalk.italic(
+          `${chalk.gray(
+            `A new version of ${tool.config.displayName} is available (`
+          )}${chalk.red(tool.version)}${chalk.gray(" -> ")}${chalk.green(
+            json.version
+          )}${chalk.gray(")")}`
+        )
     );
+
+    return { update: true };
   }
+
+  return { update: false };
 }

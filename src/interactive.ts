@@ -405,25 +405,32 @@ export default function interactive() {
       async action() {
         console.clear();
         console.log(HEADER);
-        await version();
 
-        console.log(
-          "\n" +
-            makeControlRow([
-              {
-                label: "Main menu",
-                binings: [{ touch: "m" }, { touch: "z", control: true }],
-              },
-              {
-                label: "Quit",
-                binings: [
-                  { touch: "q" },
-                  { touch: "esc" },
-                  { touch: "c", control: true },
-                ],
-              },
-            ])
-        );
+        const { update } = await version();
+
+        const controls: Control[] = [
+          {
+            label: "Main menu",
+            binings: [{ touch: "m" }, { touch: "z", control: true }],
+          },
+          {
+            label: "Quit",
+            binings: [
+              { touch: "q" },
+              { touch: "esc" },
+              { touch: "c", control: true },
+            ],
+          },
+        ];
+
+        if (update) {
+          controls.unshift({
+            label: "Update",
+            binings: [{ touch: "u" }],
+          });
+        }
+
+        console.log("\n" + makeControlRow(controls));
       },
     },
     {
@@ -460,8 +467,26 @@ export default function interactive() {
           )}`
       )
       .join("\n\n") +
-    "\n" +
-    "\u001B[?25l";
+    "\n\n" +
+    makeControlRow([
+      {
+        label: "Move up",
+        binings: [{ touch: "▲" }],
+      },
+      {
+        label: "Move down",
+        binings: [{ touch: "▼" }],
+      },
+      {
+        label: "Quit",
+        binings: [
+          { touch: "q" },
+          { touch: "esc" },
+          { touch: "c", control: true },
+        ],
+      },
+    ]);
+  ("\n\u001B[?25l");
 
   console.clear();
   console.log(f());

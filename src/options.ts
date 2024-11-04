@@ -20,6 +20,14 @@ export const optionList = {
     usage: "--version",
     default: false,
   },
+  update: {
+    alias: "u",
+    unique: true,
+    type: OptionPayloadType.BOOLEAN,
+    description: "Update the tool.",
+    usage: "--update",
+    default: false,
+  },
   output: {
     alias: "o",
     unique: false,

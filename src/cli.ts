@@ -10,6 +10,7 @@ import type { SearchData } from "./structures/Result";
 import help from "./commands/help";
 import version from "./commands/version";
 import interactive from "./interactive";
+import update from "./commands/update";
 
 function randomHex(length: number): string {
   return [...Array(length)]
@@ -19,6 +20,12 @@ function randomHex(length: number): string {
 
 if (Object.values(options).every((value) => !value)) {
   interactive();
+} else if (options.update) {
+  update();
+} else if (options.version) {
+  version();
+} else if (options.help) {
+  help();
 } else {
   process.on("unhandledRejection", (reason) => {
     process.stdout.write("\r\x1b[K\u001B[?25h");
@@ -37,16 +44,6 @@ if (Object.values(options).every((value) => !value)) {
     logger.log("Caught interrupt signal, exiting...");
     process.exit(1);
   });
-
-  if (options.version) {
-    version();
-    process.exit(0);
-  }
-
-  if (options.help) {
-    help();
-    process.exit(0);
-  }
 
   if (options.info) {
     const websites: Website[] = fs
