@@ -22,8 +22,8 @@ import Website from "../structures/Website";
 // Use this if you want to analyse a website using the easy way
 export default Website.fromJSON("websiteid", { // The Website ID following this pattern '^[a-z]+$' and matching the file name
   title: "WebsiteDotCom",  // The website title
-  nsfw: false, // If the website is NSFW (Not Safe For Work) or not
-  disableProxy: false, // Disables the usage of a Rotating IP Proxy
+  nsfw: false, // [OPTIONAL] If the website is NSFW (Not Safe For Work) or not
+  disableProxy: false, // [OPTIONAL] Disables the usage of a Rotating IP Proxy
   type: Website.Type.PERSONAL, // The type of website that you want to add (SOCIAL, PROFESSIONAL, GAMING, VIDEO, MUSIC, ART, BLOG, PERSONAL, DEVELOPMENT)
   requestUrl: "https://api.website.com/profile_username?={username}", // The request URL, use '{username}' as the placeholder for the username
   responseUrl: "https://website.com/{username}", // [OPTIONAL] How the response URL will be displayed as a result, use '{username}' as the placeholder for the username
@@ -32,19 +32,19 @@ export default Website.fromJSON("websiteid", { // The Website ID following this 
   errorUrl: "https://api.website.com/profileError", // (Only if { errorType: RESPONSE_URL }) The response URL returned if the username is unavailable
   headers: Website.DEFAULT_HEADERS, // Request headers
   requestInterval: 100, // The time (in ms) between each request to avoid 429 error code (Too Many Requests)
-  findNames: true, // Telling the tool to search for first and last names
-  findLocations: true, // Telling the tool to search for locations
-  findEmails: true, // Telling the tool to search for email addresses
-  findPhones: true, // Telling the tool to search for phone numbers
-  findUrls: true, // Telling the tool to search for linked URLs (Useful to link accounts to each others)
+  findNames: true, // [OPTIONAL] Telling the tool to search for first and last names
+  findLocations: true, // [OPTIONAL] Telling the tool to search for locations
+  findEmails: true, // [OPTIONAL] Telling the tool to search for email addresses
+  findPhones: true, // [OPTIONAL] Telling the tool to search for phone numbers
+  findUrls: true, // [OPTIONAL] Telling the tool to search for linked URLs (Useful to link accounts to each others)
   nameSelector: ".name", // (Only if { findNames: true }) Telling the tool where to find first and last names (CSS Selector)
   locationSelector: ".bio, .location", // (Only if { findLocations: true }) Telling the tool to search for location (CSS Selector)
   emailSelector: ".bio", // (Only if { findEmails: true }) Telling the tool to search for email adresses (CSS Selector)
   phoneSelector: ".bio", // (Only if { findPhones: true }) Telling the tool to search for phone numbers (CSS Selector)
   urlSelector: ".social-links, .bio", // (Only if { findUrls: true }) Telling the tool to search for linked URLs (CSS Selector)
-  urlExclude: ["facebook.com/websitedotcom"], //  (Only if { findUrls: true }) avoid accidentally collecting the website's social media links
+  urlExclude: ["facebook.com/websitedotcom"], // [OPTIONAL] (Only if { findUrls: true }) avoid accidentally collecting the website's social media links
   usernameOptions: {
-    regex: /^[a-zA-Z][a-zA-Z0-9._-]{1,30}[a-zA-Z0-9]$/, // Make the tool skip this website if the username doesn't match the given RegEx pattern
+    regex: /^[a-zA-Z][a-zA-Z0-9._-]{1,30}[a-zA-Z0-9]$/, // [OPTIONAL] Make the tool skip this website if the username doesn't match the given RegEx pattern
   },
 });
 
