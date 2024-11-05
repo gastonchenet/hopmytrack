@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 import lookup from "./lookup";
 import options, { blacklist } from "./options";
 import logger from "./util/logger";

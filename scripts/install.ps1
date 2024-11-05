@@ -77,7 +77,7 @@ try {
   New-ItemProperty -Path $RegistryKey -Name "DisplayIcon" -Value "$HmtRoot\bin\hmt.exe" -PropertyType String -Force | Out-Null
   New-ItemProperty -Path $RegistryKey -Name "UninstallString" -Value "powershell -c `"& `'$HmtRoot\uninstall.ps1`' -PauseOnError`" -ExecutionPolicy Bypass" -PropertyType String -Force | Out-Null
 } catch {
-  if ($rootKey -ne $null) {
+  if ($null -ne $rootKey) {
     Remove-Item -Path $RegistryKey -Force
   }
 }
