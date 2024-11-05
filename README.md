@@ -31,13 +31,13 @@ It uses a variety of techniques to gather data from various sources, including s
 > Kernel version 5.6 or higher is strongly recommended, but the minimum is 5.1.
 
 ```bash
-curl -fsSL https://hopmytrack.vercel.app | bash
+curl -fsSL https://hopmytrack.vercel.app/install.sh | bash
 ```
 
 ### Windows
 
 ```bash
-powershell -c "irm https://hopmytrack.vercel.app | iex"
+powershell -c "irm https://hopmytrack.vercel.app/install.ps | iex"
 ```
 
 ## Usage
