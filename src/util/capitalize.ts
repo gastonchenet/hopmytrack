@@ -1,15 +1,15 @@
-export default function capitalize(
-  str?: string | null,
+export default function capitalize<T extends string | null>(
+  str?: T,
   allFirstLetters = false
 ) {
-  if (!str) return str;
+  if (!str) return str as T;
 
   if (!allFirstLetters) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+    return (str.charAt(0).toUpperCase() + str.slice(1)) as T;
   } else {
     return str
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+      .join(" ") as T;
   }
 }

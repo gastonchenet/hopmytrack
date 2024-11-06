@@ -10,7 +10,12 @@ export default async function update() {
   const json = await response.json();
 
   if (json.version === tool.version) {
-    logger.log(chalk.green("✓") + " Already up to date");
+    console.log(
+      `${chalk.green("✓")} Already up to date ${chalk.gray(
+        `(v${tool.version})`
+      )}`
+    );
+
     process.exit(0);
   }
 

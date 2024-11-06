@@ -1,6 +1,4 @@
 import parseArgs, { OptionPayloadType } from "./parseArgs";
-import fs from "fs";
-import path from "path";
 import type { Type } from "./structures/Website";
 
 export const optionList = {
@@ -91,6 +89,14 @@ export const optionList = {
     description: "Set a proxy.",
     usage: "--proxy=<proxy>",
     default: null,
+  },
+  list: {
+    alias: "l",
+    unique: true,
+    type: OptionPayloadType.BOOLEAN,
+    description: "List all available websites.",
+    usage: "--list",
+    default: false,
   },
 };
 

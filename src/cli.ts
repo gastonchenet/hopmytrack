@@ -10,6 +10,7 @@ import help from "./commands/help";
 import version from "./commands/version";
 import interactive from "./interactive";
 import update from "./commands/update";
+import list from "./commands/list";
 
 function randomHex(length: number): string {
   return [...Array(length)]
@@ -27,6 +28,8 @@ if (Object.values(options).every((value) => !value) && !input) {
   version();
 } else if (options.help) {
   help();
+} else if (options.list) {
+  list();
 } else {
   process.on("unhandledRejection", (reason) => {
     process.stdout.write("\r\x1b[K\u001B[?25h");
@@ -70,8 +73,32 @@ if (Object.values(options).every((value) => !value) && !input) {
 
   blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
 
+  type YAMLInput = {
+    query: SearchData;
+    verbose?: boolean;
+    depth?: number;
+    output?: string;
+    proxy?: string;
+    blacklist?: string[];
+    whitelist?: string[];
+  };
+
   if (/\.ya?ml$/.test(input)) {
-    lookup(await readYamlFile<SearchData>(path.join(process.cwd(), input)));
+    const data = await readYamlFile<YAMLInput>(input);
+
+    if (!options.output && data.output) options.output = data.output;
+    if (!options.proxy && data.proxy) options.proxy = data.proxy;
+
+    if (options.verbose === undefined && data.verbose !== undefined)
+      options.verbose = data.verbose;
+
+    if (data.depth === undefined && data.depth !== undefined)
+      options.depth = data.depth;
+
+    blacklist.push(...(data.blacklist ?? []));
+    blacklist.push(...(data.whitelist ?? []));
+
+    lookup(data.query);
   } else {
     const entries = input.split(";");
 

@@ -369,4 +369,4 @@ export default Object.freeze([
     website: null,
     regex: /(?:https?:\/\/)?(?:www\.)?t\.me\/(?<username>[a-zA-Z0-9_]{5,32})/gi,
   },
-]);
+]).toSorted((a, b) => a.id.localeCompare(b.id));
