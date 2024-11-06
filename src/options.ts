@@ -1,7 +1,7 @@
-import parseArgs, { OptionPayloadType } from "./parseArgs";
+import parseArgs, { OptionPayloadType, type OptionPayload } from "./parseArgs";
 import type { Type } from "./structures/Website";
 
-export const optionList = {
+export const optionList: Record<string, OptionPayload<OptionPayloadType>> = {
   help: {
     alias: "h",
     unique: true,

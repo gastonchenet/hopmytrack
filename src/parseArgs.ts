@@ -5,18 +5,28 @@ export enum OptionPayloadType {
   ARRAY = "array",
 }
 
-type OptionPayload = {
+export type OptionPayload<T extends OptionPayloadType> = {
   alias: string;
   unique: boolean;
-  type: OptionPayloadType;
+  type: T;
   description: string;
   usage: string;
-  default: any;
+  default:
+    | (T extends OptionPayloadType.BOOLEAN
+        ? boolean
+        : T extends OptionPayloadType.NUMBER
+        ? number
+        : T extends OptionPayloadType.STRING
+        ? string
+        : T extends OptionPayloadType.ARRAY
+        ? string[]
+        : never)
+    | null;
 };
 
 function parseArgs(
   rawArgs: string[],
-  optionList: Record<string, OptionPayload> = {}
+  optionList: Record<string, OptionPayload<OptionPayloadType>> = {}
 ) {
   const options: Record<string, any> = {};
 
