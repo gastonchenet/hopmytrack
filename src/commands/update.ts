@@ -25,14 +25,14 @@ export default async function update() {
   switch (os.platform()) {
     case "win32":
       result =
-        await $`powershell -c "irm https://gastonchenet.fr/hopmytrack/install.ps1 | iex"`;
+        await $`powershell -c "irm https://hopmytrack.vercel.app/install.ps | iex"`;
 
       break;
 
     case "darwin":
     case "linux":
       result =
-        await $`curl -fsSL https://gastonchenet.fr/hopmytrack/install.sh | bash`;
+        await $`curl -fsSL https://hopmytrack.vercel.app/install.sh | bash`;
 
       break;
 

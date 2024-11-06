@@ -54,9 +54,7 @@ try {
   }
 } catch {}
 
-$Version = "$HmtRoot\bin\hmt.exe" --version
-
-Write-Output "HopMyTrack succesfully installed!`nYou're currently on the latest version $Version"
+Write-Output "HopMyTrack succesfully installed!"
 
 # Adding the executable to the PATH
 if(!$PathAlreadyExists) {

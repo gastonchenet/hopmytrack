@@ -39,10 +39,7 @@ rm $hmt_path ||
 chmod +x $hmt_root/bin/hmt ||
   error "Failed to set permissions on HopMyTrack executable"
 
-version=$($hmt_root/bin/hmt --version)
-
 echo "HopMyTrack succesfully installed!"
-echo "You're currently on the latest version $version"
 
 # Adding the executable to the PATH
 if ! grep -q $hmt_root/bin <<< $PATH; then

@@ -34,7 +34,7 @@ zip_build dar x64
 zip_build win x64
 
 # Making the ZIP file
-zip -r "$release_dir/Source code.zip" ./src ./LICENSE ./README.md ./package.json -x src/test/*
+zip -r "$release_dir/Source code.zip" ./src ./LICENSE ./README.md ./package.json
 
 # Making the TAR.GZ file
-tar -czf "$release_dir/Source code.tar.gz" ./src ./LICENSE ./README.md ./package.json -X src/test/*
+tar -czf "$release_dir/Source code.tar.gz" ./src ./LICENSE ./README.md ./package.json
