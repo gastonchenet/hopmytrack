@@ -15,15 +15,15 @@ export default function help() {
   console.log(chalk.bold("\nUsage:"));
   console.log(
     `  ${chalk.magenta.bold("hmt")} ${chalk.gray(
-      "# Interactive cli"
-    )}\n  ${chalk.magenta.bold("hmt")} [...flags] ${chalk.gray(
-      "# Command line tool"
+      "                      # Interactive cli"
+    )}\n  ${chalk.magenta.bold("hmt")} <input> [...flags] ${chalk.gray(
+      "   # Command line tool"
     )}`
   );
 
   console.log(chalk.bold("\nExamples:"));
   console.log(
-    `  ${chalk.magenta.bold("hmt")} -I ${chalk.green(
+    `  ${chalk.magenta.bold("hmt")} ${chalk.green(
       '"username:example;first_name:John;last_name:Doe"'
     )} -V! -b github -d 5 -o output.txt\n  ${chalk.gray(
       "# Search for 'John Doe' with the username 'example' in verbose mode with NSFW enabled, blacklist GitHub and search for 5 levels deep, output the results to 'output.txt'."
@@ -33,7 +33,7 @@ export default function help() {
   console.log(
     `\n  ${chalk.magenta.bold(
       "hmt"
-    )} -I info.yml -Vc -w github,gitlab -d 3 -p ${chalk.underline.cyan(
+    )} info.yml -Vc -w github,gitlab -d 3 -p ${chalk.underline.cyan(
       "https://username:password@proxy.example.com:8080"
     )}\n  ${chalk.gray(
       "# Search using the data in 'info.yml' in verbose mode without outputing colors, check GitHub and GitLab, search for 3 levels deep, and use a proxy."

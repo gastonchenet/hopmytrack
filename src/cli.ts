@@ -4,9 +4,6 @@ import lookup from "./lookup";
 import options, { blacklist } from "./options";
 import logger from "./util/logger";
 import path from "path";
-import fs from "fs";
-import type Website from "./structures/Website";
-import chalk from "chalk";
 import readYamlFile from "read-yaml-file";
 import type { SearchData } from "./structures/Result";
 import help from "./commands/help";
@@ -20,7 +17,9 @@ function randomHex(length: number): string {
     .join("");
 }
 
-if (Object.values(options).every((value) => !value)) {
+const input = Bun.argv[2];
+
+if (Object.values(options).every((value) => !value) && !input) {
   interactive();
 } else if (options.update) {
   update();
@@ -47,54 +46,7 @@ if (Object.values(options).every((value) => !value)) {
     process.exit(1);
   });
 
-  if (options.info) {
-    const websites: Website[] = fs
-      .readdirSync(path.join(__dirname, "websites"))
-      .map((file) => {
-        return require(path.join(__dirname, "websites", file)).default;
-      });
-
-    const website = websites.find(
-      (website) =>
-        website.id === options.info.toLowerCase() ||
-        website.title.toLowerCase().replace(/[^a-z0-9]/g, "") ===
-          options.info.toLowerCase().replace(/[^a-z0-9]/g, "")
-    );
-
-    const typeWebsites = websites.filter(
-      (website) => website.type.toLowerCase() === options.info.toLowerCase()
-    );
-
-    if (!website && typeWebsites.length === 0) {
-      logger.error(`Website '${options.info}' not found.`);
-      process.exit(1);
-    }
-
-    if (website) {
-      console.log(website.toString());
-    }
-
-    if (typeWebsites.length > 0) {
-      console.log(
-        `Websites of type ${chalk.cyan(
-          chalk.italic(options.info.toUpperCase())
-        )}${chalk.gray(":")}\n${typeWebsites
-          .map(
-            (w) =>
-              `${chalk.gray("-")} ${w.title} ${chalk.gray(`(id: ${w.id})`)}${
-                w.nsfw
-                  ? ` ${chalk.gray("(")}${chalk.red("!")}${chalk.gray(")")}`
-                  : ""
-              }`
-          )
-          .join("\n")}`
-      );
-    }
-
-    process.exit(0);
-  }
-
-  if (!options.input) {
+  if (!input || input.startsWith("-")) {
     logger.error("No input string/file provided.");
     process.exit(1);
   }
@@ -118,12 +70,10 @@ if (Object.values(options).every((value) => !value)) {
 
   blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
 
-  if (/\.ya?ml$/.test(options.input)) {
-    lookup(
-      await readYamlFile<SearchData>(path.join(process.cwd(), options.input))
-    );
+  if (/\.ya?ml$/.test(input)) {
+    lookup(await readYamlFile<SearchData>(path.join(process.cwd(), input)));
   } else {
-    const entries = options.input.split(";");
+    const entries = input.split(";");
 
     if (entries.length === 0) {
       logger.error("Invalid input string.");

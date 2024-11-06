@@ -31,13 +31,13 @@ It uses a variety of techniques to gather data from various sources, including s
 > Kernel version 5.6 or higher is strongly recommended, but the minimum is 5.1.
 
 ```bash
-curl -fsSL https://hopmytrack.vercel.app/install.sh | bash
+$ curl -fsSL https://hopmytrack.vercel.app/install.sh | bash
 ```
 
 ### Windows
 
 ```bash
-powershell -c "irm https://hopmytrack.vercel.app/install.ps | iex"
+$ powershell -c "irm https://hopmytrack.vercel.app/install.ps | iex"
 ```
 
 ## Usage
@@ -49,7 +49,7 @@ There are two ways to use HopMyTrack:
 You can use HopMyTrack from the command line if you want to use it as a standalone tool. The following command will search for information about a person named _John Doe_ and save the results to a file called **output.txt**:
 
 ```bash
-hmt --input "username:john_doe;first_name:John;last_name:Doe" --verbose --output "output.txt"
+$ hmt "username:john_doe;first_name:John;last_name:Doe" --verbose --output "output.txt"
 ```
 
 ### Interactive Mode
@@ -59,7 +59,7 @@ You can also use HopMyTrack in interactive mode, which provides a more user-frie
 > Note: The interactive mode may not be available on all platforms.
 
 ```bash
-hmt
+$ hmt
 ```
 
 ## Features
@@ -67,14 +67,14 @@ hmt
 `HopMyTrack` offers a wide range of features, including:
 
 ```bash
-hmt                                    # Run HopMyTrack in interactive mode (if available)
+$ hmt                                    # Run HopMyTrack in interactive mode (if available)
 
-hmt --help                             # Display the help message
-hmt --version                          # Display the version number
+$ hmt --help                             # Display the help message
+$ hmt --version                          # Display the version number
 
-hmt --input <input> --depth <depth>    # Set the search depth
-hmt --input <input> --proxy <proxy>    # Use a proxy server
-hmt --input <input> --verbose          # Display verbose output
+$ hmt <input> --depth <depth>            # Set the search depth
+$ hmt <input> --proxy <proxy>            # Use a proxy server
+$ hmt <input> --verbose                  # Display verbose output
 ```
 
 ## Contributing

@@ -5,7 +5,7 @@ Contributions are welcome! Here are a few ways you can help improve `HopMyTrack`
 - You can easily contribute by [adding websites](#adding-a-website) to the project.
 - Report bugs and request new features by opening an [issue](https://github.com/gastonchenet/hopmytrack/issues).
 - Submit a [pull request](https://github.com/gastonchenet/hopmytrack/pulls) with bug fixes or new features.
-- Help improve the documentation by fixing typos, adding examples, or suggesting improvements.
+- Help improve the documentation by fixing typos in the documentation and in the useful files such as [README](README.md) or [CONTRIBUTING](CONTRIBUTING.md), adding examples, or suggesting improvements.
 
 Before contributing, please read our [Code of Conduct](CODE_OF_CONDUCT.md).
 
@@ -16,12 +16,14 @@ You can easily add a website to fetch to the tool by following these steps
 ### Creating the website analyzer file
 
 > Add a file : /src/websites/<WEBSITE_ID>.ts
+
 ```typescript
 import Website from "../structures/Website";
 
 // Use this if you want to analyse a website using the easy way
-export default Website.fromJSON("websiteid", { // The Website ID following this pattern '^[a-z]+$' and matching the file name
-  title: "WebsiteDotCom",  // The website title
+export default Website.fromJSON("websiteid", {
+  // The Website ID following this pattern '^[a-z]+$' and matching the file name
+  title: "WebsiteDotCom", // The website title
   type: Website.Type.PERSONAL, // The type of website that you want to add (SOCIAL, PROFESSIONAL, GAMING, VIDEO, MUSIC, ART, BLOG, PERSONAL, DEVELOPMENT)
   headers: Website.DEFAULT_HEADERS, // Request headers
   requestInterval: 100, // The time (in ms) between each request to avoid 429 error code (Too Many Requests)
@@ -60,10 +62,11 @@ export default Website.fromJSON("websiteid", { // The Website ID following this 
 // Use this if you want to analyse a website by using a custom code
 export default new Website(
   "websiteid", // The Website ID following this pattern '^[a-z]+$' and matching the file name,
-  "WebsiteDotCom",  // The website title
-  Website.Type.PERSONAL,  // The type of website that you want to add (SOCIAL, PROFESSIONAL, GAMING, VIDEO, MUSIC, ART, BLOG, PERSONAL, DEVELOPMENT)
+  "WebsiteDotCom", // The website title
+  Website.Type.PERSONAL, // The type of website that you want to add (SOCIAL, PROFESSIONAL, GAMING, VIDEO, MUSIC, ART, BLOG, PERSONAL, DEVELOPMENT)
   false, // If the website is NSFW (Not Safe For Work) or not
-  [ // Which Actions the code you made does
+  [
+    // Which Actions the code you made does
     Website.Actions.PAGE_NAMES,
     Website.Actions.PAGE_LOCATIONS,
     Website.Actions.PAGE_EMAILS,
@@ -73,22 +76,22 @@ export default new Website(
   async (previousResult) => {
     // Your code, previous result is the search data or the last iteration's found data
   }
-)
+);
 ```
 
 ### Creating the website finder file
 
 > In /src/websites.ts
+
 ```typescript
 export default Object.freeze([
-  ...
-  {
+  ...{
     title: "WebsiteDotCom", // The website title
     id: "github", // The Website ID following this pattern '^[a-z]+$' and matching the website analyzer file name
     website: require("./websites/websiteid.ts").default as Website, // Use the path to the the website analyzer file
     regex:
       /(?:https?:\/\/)?(?:www\.)?website\.com\/(?<username>[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})/gi, // The matching pattern of any of the website's profile pages
-  }
+  },
 ]);
 ```
 

@@ -76,14 +76,6 @@ export const optionList = {
     usage: "--whitelist=<website1>,<website2>,...",
     default: null,
   },
-  "whitelist-file": {
-    alias: "W",
-    unique: false,
-    type: OptionPayloadType.STRING,
-    description: "Set a file with a list of websites to search through.",
-    usage: "--whitelist-file=<file>",
-    default: null,
-  },
   blacklist: {
     alias: "b",
     unique: false,
@@ -92,36 +84,12 @@ export const optionList = {
     usage: "--blacklist=<website1>,<website2>,...",
     default: null,
   },
-  "blacklist-file": {
-    alias: "B",
-    unique: false,
-    type: OptionPayloadType.STRING,
-    description: "Set a file with a list of websites to ignore.",
-    usage: "--blacklist-file=<file>",
-    default: null,
-  },
-  info: {
-    alias: "i",
-    unique: true,
-    type: OptionPayloadType.STRING,
-    description: "Information about a website.",
-    usage: "--input=<website|type>",
-    default: null,
-  },
   proxy: {
     alias: "p",
     unique: false,
     type: OptionPayloadType.STRING,
     description: "Set a proxy.",
     usage: "--proxy=<proxy>",
-    default: null,
-  },
-  input: {
-    alias: "I",
-    unique: false,
-    type: OptionPayloadType.STRING,
-    description: "Input file.",
-    usage: "--input=<file>",
     default: null,
   },
 };
@@ -134,18 +102,6 @@ if (options.proxy && !options.proxy.startsWith("http")) {
 
 const whitelist = [...new Set(options.whitelist ?? [])];
 const blacklist = [...new Set(options.blacklist ?? [])];
-
-if (options["whitelist-file"]) {
-  const file = path.join(process.cwd(), options["whitelist-file"]);
-  const data = fs.readFileSync(file, "utf-8");
-  whitelist.push(...data.split(/\r?\n/).map((line) => line.trim()));
-}
-
-if (options["blacklist-file"]) {
-  const file = path.join(process.cwd(), options["blacklist-file"]);
-  const data = fs.readFileSync(file, "utf-8");
-  blacklist.push(...data.split(/\r?\n/).map((line) => line.trim()));
-}
 
 function allowed(id: string, type: Type) {
   if (id === "root") return true;
