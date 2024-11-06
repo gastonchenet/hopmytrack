@@ -41,31 +41,18 @@ Move-Item -Path "$HmtRoot\$FileName.exe" -Destination "$HmtRoot\bin\hmt.exe" -Fo
 # Cleaning up the zip file
 Remove-Item $HmtPath -Force
 
-# Verifying if there is other hmt.exe in the PATH
-$PathAlreadyExists = $false;
-
-try {
-  $Existing = Get-Command hmt -ErrorAction
-
-  if ($Existing.Source -ne $HmtPath) {
-    Write-Warning "Note: Another hmt.exe is already in %PATH% at $($Existing.Source)`nTyping 'hmt' in your terminal will not use what was just installed."
-
-    $PathAlreadyExists = $true;
-  }
-} catch {}
-
 Write-Output "HopMyTrack succesfully installed!"
 
-# Adding the executable to the PATH
-if(!$PathAlreadyExists) {
-  $CurrentPath = [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
-  
+$CurrentPath = [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
+
+if ($CurrentPath -notmatch [RegEx]::Escape("$HmtRoot\bin")) {
   $NewPath = "$CurrentPath;$HmtRoot\bin"
-
   [System.Environment]::SetEnvironmentVariable("Path", $NewPath, [System.EnvironmentVariableTarget]::User)
-
-  Write-Output "`nStart another terminal to be able to use the command 'hmt'"
+} else {
+  Write-Warning "`nNote: Another hmt.exe is already in %PATH% at $($Existing.Source)`nTyping 'hmt' in your terminal will not use what was just installed."
 }
+
+Write-Output "`nStart another terminal to be able to use the command 'hmt'"
 
 # Adding the uninstall script
 $rootKey = $null
