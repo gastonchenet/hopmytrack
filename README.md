@@ -79,6 +79,10 @@ $ hmt <input> --verbose                  # Display verbose output
 
 ## Contributing
 
+Thank you to everyone who has contributed to HopMyTrack! ❤️
+
+[<img alt="Contributors" src="http://129.151.231.6:8084/repositories/hopmytrack/contributors" width="100%">](#)
+
 Refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file for more information on how to contribute to this project.
 
 ## License
