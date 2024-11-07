@@ -3,6 +3,7 @@ import capitalize from "../util/capitalize";
 import websites from "../websites";
 import readline from "node:readline";
 import logger from "../util/logger";
+import { makeControlRow } from "../util/makeControlRow";
 
 type Key = {
   sequence: string;
@@ -23,6 +24,7 @@ export default function list() {
   );
 
   let page = 0;
+  let maxPage = Math.ceil(websites.length / ITEMS_PER_PAGE);
   let search = "";
   let lastLength = websites.length;
   let lastPage = page;
@@ -48,12 +50,13 @@ export default function list() {
 
     lastLength = filtered.length;
     lastPage = page;
+    maxPage = Math.ceil(filtered.length / ITEMS_PER_PAGE);
 
     console.clear();
     process.stdout.write(
-      `${chalk.gray(
-        `(${page + 1}/${Math.ceil(filtered.length / ITEMS_PER_PAGE)})`
-      )} ${chalk.bold("Available websites:")}\n\n` +
+      `${chalk.gray(`(${page + 1}/${maxPage})`)} ${chalk.bold(
+        "Available websites:"
+      )}\n\n` +
         filtered
           .slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE)
           .map(
@@ -87,7 +90,25 @@ export default function list() {
         (filtered.length > 0 ? "\n\n" : "") +
         chalk.bold("Search:") +
         " " +
-        search
+        search +
+        "\n" +
+        makeControlRow([
+          {
+            label: "Navigate",
+            binings: [{ touch: "▲" }, { touch: "▼" }],
+          },
+          {
+            label: "Quit",
+            binings: [
+              { touch: "q" },
+              { touch: "esc" },
+              { touch: "c", control: true },
+            ],
+          },
+        ]) +
+        `\x1b[s\x1b[3A\x1b[${
+          Math.min(120, process.stdout.columns) - 8 - search.length
+        }D`
     );
   };
 
@@ -99,7 +120,7 @@ export default function list() {
       key.name === "escape" ||
       key.name === "q"
     ) {
-      process.stdout.write("\n\r\x1b[K\u001B[?25h");
+      process.stdout.write("\x1b[u\n\r\x1b[K\u001B[?25h");
       logger.log("Caught interrupt signal, exiting...");
       process.exit(1);
     }
@@ -110,7 +131,7 @@ export default function list() {
     }
 
     if (key.name === "down") {
-      if (page < Math.ceil(websites.length / ITEMS_PER_PAGE) - 1) page++;
+      if (page < maxPage - 1) page++;
       rewrite();
     }
 

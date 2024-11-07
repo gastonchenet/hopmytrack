@@ -7,8 +7,12 @@ import version from "./commands/version";
 import chalk from "chalk";
 import logger from "./util/logger";
 import lookup, { FETCHING_MESSAGES, SPINNER_CHARS } from "./lookup";
-import boxen from "boxen";
 import events, { EventType } from "./events";
+import {
+  makeControlRow,
+  type Control,
+  type Touch,
+} from "./util/makeControlRow";
 
 enum InputType {
   LIST,
@@ -46,20 +50,9 @@ type Key = {
   shift: boolean;
 };
 
-type Touch = {
-  touch: string;
-  control?: boolean;
-  shift?: boolean;
-};
-
 type Binding = {
   keys: Touch[];
   action: () => Promise<any>;
-};
-
-type Control = {
-  label: string;
-  binings: Touch[];
 };
 
 const TAB = " ".repeat(2);
@@ -77,34 +70,6 @@ const HEADER =
   "\n\n";
 
 const emitter = new EventEmitter();
-
-function makeControlRow(controls: Control[]) {
-  return boxen(
-    " " +
-      controls
-        .map(
-          (control) =>
-            control.binings
-              .map((binding) =>
-                chalk.bgWhite.black(
-                  " " +
-                    (binding.control ? "Ctrl+" : "") +
-                    (binding.shift ? "Shift+" : "") +
-                    binding.touch.toUpperCase() +
-                    " "
-                )
-              )
-              .join(" ") +
-            " " +
-            control.label
-        )
-        .join(" ".repeat(6)),
-    {
-      width: Math.min(process.stdout.columns, 120),
-      borderColor: "gray",
-    }
-  );
-}
 
 export default function interactive() {
   let writing: Writing | null = null;
@@ -470,12 +435,8 @@ export default function interactive() {
     "\n\n" +
     makeControlRow([
       {
-        label: "Move up",
-        binings: [{ touch: "▲" }],
-      },
-      {
-        label: "Move down",
-        binings: [{ touch: "▼" }],
+        label: "Navigate",
+        binings: [{ touch: "▲" }, { touch: "▼" }],
       },
       {
         label: "Quit",
