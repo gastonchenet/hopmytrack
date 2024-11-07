@@ -37,8 +37,8 @@ function getURLFromHref(rootUrl: string, html: string) {
     ...html.matchAll(
       new RegExp(
         `href\\s*=\\s*"(?<content>(?:https?:\\/\\/(?:[a-zA-Z0-9-]*\\.)*${url.hostname.replace(
-          /\./g,
-          "\\."
+          /[\\\.]/g,
+          "\\$&"
         )})?\\/?[a-zA-Z0-9_~#?%&/-]*(?:|\\.(?:html?|php)))"`,
         "g"
       )
