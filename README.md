@@ -1,8 +1,6 @@
-<p align="center">
-	<h1 id="hopmytrack">HopMyTrack</h1>
-</p>
+<h1 id="hopmytrack">HopMyTrack</h1>
 
-<p align="center">
+<p>
 	<a href="https://hopmytrack.vercel.app/">Website</a>
 	&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
 	<a href="https://hopmytrack.vercel.app/docs">Documentation</a>
