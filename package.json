@@ -1,70 +1,70 @@
 {
-  "name": "hmt",
-  "bin": "./src/cli.ts",
-  "config": {
-    "displayName": "HopMyTrack"
-  },
-  "description": "HopMyTrack is an OSINT (Open Source Intelligence) tool that allows you to find every social media profile of a person using known info.",
-  "keywords": [
-    "osint",
-    "social media",
-    "profile",
-    "person",
-    "info",
-    "intelligence",
-    "tool"
-  ],
-  "version": "0.1.22",
-  "author": {
-    "name": "gastonchenet",
-    "email": "contact@gastonchenet.fr",
-    "url": "https://gastonchenet.fr"
-  },
-  "homepage": "https:/github.com/gastonchenet/hopmytrack#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gastonchenet/hopmytrack.git"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/gastonchenet/hopmytrack/issues",
-    "email": "contact@gastonchenet.fr"
-  },
-  "funding": {
-    "type": "individual",
-    "url": "https://github.com/sponsors/gastonchenet"
-  },
-  "private": false,
-  "module": "./src/cli.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/figlet": "^1.7.0",
-    "@types/user-agents": "^1.0.4",
-    "cross-env": "^7.0.3"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "scripts": {
-    "build": "bun run build:lin:x64 && bun run build:lin:aarch64 && bun run build:dar:x64 && bun run build:dar:aarch64 && bun run build:win:x64",
-    "build:lin:x64": "bun build --compile --target=bun-linux-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-lin-x64 --icon ./assets/icon.ico",
-    "build:lin:aarch64": "bun build --compile --target=bun-linux-arm64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-lin-aarch64 --icon ./assets/icon.ico",
-    "build:dar:x64": "bun build --compile --target=bun-darwin-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-dar-x64 --icon ./assets/icon.ico",
-    "build:dar:aarch64": "bun build --compile --target=bun-darwin-arm64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-dar-aarch64 --icon ./assets/icon.ico",
-    "build:win:x64": "bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-win-x64 --icon ./assets/icon.ico",
-    "dev": "bun run ./src/cli.ts",
-    "test": "bun test"
-  },
-  "dependencies": {
-    "boxen": "^8.0.1",
-    "chalk": "^5.3.0",
-    "gradient-string": "^3.0.0",
-    "libphonenumber-js": "^1.11.0",
-    "moment": "^2.30.1",
-    "node-html-parser": "^6.1.13",
-    "read-yaml-file": "^2.1.0",
-    "ts-node": "^10.9.2",
-    "user-agents": "^1.1.195"
-  }
+	"name": "hmt",
+	"bin": "./src/cli.ts",
+	"config": {
+		"displayName": "HopMyTrack"
+	},
+	"description": "HopMyTrack is an OSINT (Open Source Intelligence) tool that allows you to find every social media profile of a person using known info.",
+	"keywords": [
+		"osint",
+		"social media",
+		"profile",
+		"person",
+		"info",
+		"intelligence",
+		"tool"
+	],
+	"version": "0.1.23",
+	"author": {
+		"name": "gastonchenet",
+		"email": "contact@gastonchenet.fr",
+		"url": "https://gastonchenet.fr"
+	},
+	"homepage": "https:/github.com/gastonchenet/hopmytrack#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gastonchenet/hopmytrack.git"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/gastonchenet/hopmytrack/issues",
+		"email": "contact@gastonchenet.fr"
+	},
+	"funding": {
+		"type": "individual",
+		"url": "https://github.com/sponsors/gastonchenet"
+	},
+	"private": false,
+	"module": "./src/cli.ts",
+	"type": "module",
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/figlet": "^1.7.0",
+		"@types/user-agents": "^1.0.4",
+		"cross-env": "^7.0.3"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"scripts": {
+		"build": "bun run build:lin:x64 && bun run build:lin:aarch64 && bun run build:dar:x64 && bun run build:dar:aarch64 && bun run build:win:x64",
+		"build:lin:x64": "bun build --compile --target=bun-linux-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-lin-x64 --icon ./assets/icon.ico",
+		"build:lin:aarch64": "bun build --compile --target=bun-linux-arm64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-lin-aarch64 --icon ./assets/icon.ico",
+		"build:dar:x64": "bun build --compile --target=bun-darwin-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-dar-x64 --icon ./assets/icon.ico",
+		"build:dar:aarch64": "bun build --compile --target=bun-darwin-arm64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-dar-aarch64 --icon ./assets/icon.ico",
+		"build:win:x64": "bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/cli.ts --outfile ./build/hopmytrack-win-x64 --icon ./assets/icon.ico",
+		"dev": "bun run ./src/cli.ts",
+		"test": "bun test"
+	},
+	"dependencies": {
+		"boxen": "^8.0.1",
+		"chalk": "^5.3.0",
+		"gradient-string": "^3.0.0",
+		"libphonenumber-js": "^1.11.0",
+		"moment": "^2.30.1",
+		"node-html-parser": "^6.1.13",
+		"read-yaml-file": "^2.1.0",
+		"ts-node": "^10.9.2",
+		"user-agents": "^1.1.195"
+	}
 }
