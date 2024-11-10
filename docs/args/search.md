@@ -93,7 +93,13 @@ You can also use an input file to provide search arguments. The input file shoul
 
 ```yaml
 # input.yml
-query: ... # The search query
+query:
+	usernames:
+		- john_doe
+		- johnny_doe
+	first_name: John
+	last_name: Doe
+	location: New York
 
 depth: 3 # Set the search depth to 3
 nsfw: true # Enable NSFW content
