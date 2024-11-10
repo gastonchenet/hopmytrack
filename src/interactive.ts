@@ -79,9 +79,6 @@ export default async function interactive() {
 	let done = true;
 	let activeBindings: Binding[] = [];
 
-	const blackSheep = await getBlackSheeps();
-	blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
-
 	function input<T extends InputType>(
 		type: T,
 		options: InputOptions = {}
@@ -134,6 +131,10 @@ export default async function interactive() {
 					"Lookup information using the provided data.\n" +
 						chalk.italic.gray("Leave fields empty to skip.\n")
 				);
+
+				blacklist.splice(0, blacklist.length);
+				const blackSheep = await getBlackSheeps();
+				blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
 
 				process.stdout.write(`\r${chalk.cyan("Usernames")}${chalk.gray(":")} `);
 
