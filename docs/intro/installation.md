@@ -24,7 +24,6 @@ After the installation is complete, you can check if `HopMyTrack` is installed c
 
 ```bash
 $ hmt --version
-0.1.x
 ```
 
 If you've installed `HopMyTrack` but are seeing a `command not found` error, you may need to add the installation directory to your `PATH` environment variable. The installation directory is typically `$HOME/.hmt/bin` on Linux and MacOS, and `$env:USERPROFILE/.hmt/bin` on Windows.
