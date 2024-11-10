@@ -1,11 +1,11 @@
 <h1 id="hopmytrack">HopMyTrack</h1>
 
 <p>
-	<a href="https://hopmytrack.vercel.app/">Website</a>
+	<a href="https://hopmytrack.vercel.app/" target="_blank">Website</a>
 	&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
-	<a href="https://hopmytrack.vercel.app/docs">Documentation</a>
+	<a href="https://hopmytrack.vercel.app/docs" target="_blank">Documentation</a>
 	&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
-	<a href="https://discord.com/invite/ezzV9MUs7n">Discord</a>
+	<a href="https://discord.com/invite/ezzV9MUs7n" target="_blank">Discord</a>
 </p>
 
 ![](https://img.shields.io/github/license/gastonchenet/hopmytrack) ![](https://img.shields.io/github/v/release/gastonchenet/hopmytrack) ![](https://img.shields.io/github/issues/gastonchenet/hopmytrack) ![](https://img.shields.io/github/issues-pr/gastonchenet/hopmytrack) ![](https://img.shields.io/github/forks/gastonchenet/hopmytrack) ![](https://img.shields.io/github/stars/gastonchenet/hopmytrack)
