@@ -56,7 +56,7 @@ $ hmt "username:john_doe;first_name:John;last_name:Doe" --verbose --output "outp
 
 You can also use HopMyTrack in interactive mode, which provides a more user-friendly experience. Simply run the following command and follow the prompts:
 
-> Note: The interactive mode may not be available on all platforms.
+> **Note:** The interactive mode may not be available on all platforms.
 
 ```bash
 $ hmt

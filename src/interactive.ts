@@ -13,6 +13,8 @@ import {
 	type Control,
 	type Touch,
 } from "./util/makeControlRow";
+import getBlackSheeps from "./util/getBlackSheeps";
+import { blacklist } from "./options";
 
 enum InputType {
 	LIST,
@@ -71,11 +73,14 @@ const HEADER =
 
 const emitter = new EventEmitter();
 
-export default function interactive() {
+export default async function interactive() {
 	let writing: Writing | null = null;
 	let buffer = "";
 	let done = true;
 	let activeBindings: Binding[] = [];
+
+	const blackSheep = await getBlackSheeps();
+	blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
 
 	function input<T extends InputType>(
 		type: T,
