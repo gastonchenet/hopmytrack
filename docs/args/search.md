@@ -94,12 +94,12 @@ You can also use an input file to provide search arguments. The input file shoul
 ```yaml
 # input.yml
 query:
-	usernames:
+	usernames: # A list of usernames
 		- john_doe
 		- johnny_doe
-	first_name: John
-	last_name: Doe
-	location: New York
+	first_name: John # The first name of the person
+	last_name: Doe # The last name of the person
+	location: New York # The location of the person
 
 depth: 3 # Set the search depth to 3
 nsfw: true # Enable NSFW content
