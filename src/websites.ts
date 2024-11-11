@@ -397,4 +397,25 @@ export default Object.freeze([
 		regex:
 			/(?:https?:\/\/)?(?:www\.)?chaturbate\.com\/(?<username>[a-zA-Z0-9_-]{3,32})/gi,
 	},
+	{
+		title: "freeCodeCamp",
+		id: "freecodecamp",
+		website: require("./websites/freecodecamp.ts").default as Website,
+		regex:
+			/(?:https?:\/\/)?(?:www\.)?freecodecamp\.org\/(?<username>[a-zA-Z0-9_-]{3,20})/gi,
+	},
+	{
+		title: "Geocaching",
+		id: "geocaching",
+		website: require("./websites/geocaching.ts").default as Website,
+		regex:
+			/(?:https?:\/\/)?(?:www\.)?geocaching\.com\/p\/default\.aspx\?u=(?<username>[a-zA-Z0-9_-]{3,20})/gi,
+	},
+	{
+		title: "Jeuvideo.com",
+		id: "jeuxvideocom",
+		website: require("./websites/jeuxvideocom.ts").default as Website,
+		regex:
+			/(?:https?:\/\/)?(?:www\.)?jeuxvideo\.com\/profil\/(?<username>[a-zA-Z0-9_-]{3,20})(?:\?mode=infos)?/gi,
+	},
 ]).toSorted((a, b) => a.id.localeCompare(b.id));
