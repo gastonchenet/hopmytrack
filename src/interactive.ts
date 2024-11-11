@@ -1,7 +1,6 @@
 import { vice } from "gradient-string";
 import readline from "node:readline";
 import tool from "../package.json";
-import EventEmitter from "events";
 import help from "./commands/help";
 import version from "./commands/version";
 import chalk from "chalk";
@@ -71,8 +70,6 @@ const HEADER =
 	) +
 	"\n\n";
 
-const emitter = new EventEmitter();
-
 export default async function interactive() {
 	let writing: Writing | null = null;
 	let buffer = "";
@@ -82,7 +79,7 @@ export default async function interactive() {
 	function input<T extends InputType>(
 		type: T,
 		options: InputOptions = {}
-	): Promise<InputReturnType<T>> {
+	): Promise<InputReturnType<T> | null> {
 		writing = {
 			type,
 			pattern: options.pattern,
@@ -94,7 +91,7 @@ export default async function interactive() {
 		return new Promise((resolve) => {
 			events.once(EventType.TypingEvent, (data) => {
 				writing = null;
-				if (data === undefined) return;
+				if (data === undefined) return resolve(null);
 
 				switch (type) {
 					case InputType.LIST:
@@ -132,16 +129,14 @@ export default async function interactive() {
 						chalk.italic.gray("Leave fields empty to skip.\n")
 				);
 
-				blacklist.splice(0, blacklist.length);
-				const blackSheep = await getBlackSheeps();
-				blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
-
 				process.stdout.write(`\r${chalk.cyan("Usernames")}${chalk.gray(":")} `);
 
 				const usernames = await input(InputType.LIST, {
 					pattern: /[a-z0-9_.-]/i,
 					displayMode: DisplayMode.LOWERCASE,
 				});
+
+				if (usernames === null) return;
 
 				if (usernames.length < 1) {
 					process.stdout.write(chalk.gray("No usernames provided"));
@@ -155,6 +150,8 @@ export default async function interactive() {
 					displayMode: DisplayMode.CAPITALIZE,
 					pattern: /[a-z -]/i,
 				});
+
+				if (firstName === null) return;
 
 				if (!firstName) {
 					process.stdout.write(chalk.gray("No first name provided"));
@@ -172,6 +169,8 @@ export default async function interactive() {
 						pattern: /[a-z -]/i,
 					});
 
+					if (lastName === null) return;
+
 					if (!lastName) {
 						process.stdout.write(chalk.gray("No last name provided"));
 						firstName = null;
@@ -186,6 +185,8 @@ export default async function interactive() {
 					displayMode: DisplayMode.CAPITALIZE,
 				});
 
+				if (location === null) return;
+
 				if (!location) {
 					process.stdout.write(chalk.gray("No location provided"));
 				}
@@ -197,6 +198,10 @@ export default async function interactive() {
 				} else {
 					console.log(HEADER);
 					console.log("\n");
+
+					blacklist.splice(0, blacklist.length);
+					const blackSheep = await getBlackSheeps();
+					blacklist.push(...new Set(blackSheep.urls.map((r) => r.id)));
 
 					const message =
 						FETCHING_MESSAGES[
@@ -473,7 +478,7 @@ export default async function interactive() {
 		}
 
 		if (key.sequence === "\u001A") {
-			emitter.emit(EventType.TypingEvent);
+			events.emit(EventType.TypingEvent);
 			done = true;
 			activeBindings = [];
 
