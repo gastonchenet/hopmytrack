@@ -17,8 +17,8 @@
 	"version": "0.1.23",
 	"author": {
 		"name": "gastonchenet",
-		"email": "contact@gastonchenet.fr",
-		"url": "https://gastonchenet.fr"
+		"email": "contact@gastonchenet.com",
+		"url": "https://gastonchenet.com"
 	},
 	"homepage": "https:/github.com/gastonchenet/hopmytrack#readme",
 	"repository": {
@@ -28,7 +28,7 @@
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/gastonchenet/hopmytrack/issues",
-		"email": "contact@gastonchenet.fr"
+		"email": "contact@gastonchenet.com"
 	},
 	"funding": {
 		"type": "individual",
@@ -63,7 +63,9 @@
 		"libphonenumber-js": "^1.11.0",
 		"moment": "^2.30.1",
 		"node-html-parser": "^6.1.13",
+		"open": "^10.1.0",
 		"read-yaml-file": "^2.1.0",
+		"sass": "^1.83.4",
 		"ts-node": "^10.9.2",
 		"user-agents": "^1.1.195"
 	}

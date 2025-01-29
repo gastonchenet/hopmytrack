@@ -14,6 +14,7 @@ export default Website.fromJSON("github", {
 	findEmails: true,
 	findPhones: true,
 	nameSelector: ".vcard-names",
+	emailSelector: "*[itemprop='email']",
 	locationSelector: "*[itemprop='homeLocation']",
 	urlSelector:
 		".vcard-details *[itemprop='url'], .vcard-details *[itemprop='social'], .Layout-main",

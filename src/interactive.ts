@@ -14,6 +14,7 @@ import {
 } from "./util/makeControlRow";
 import getBlackSheeps from "./util/getBlackSheeps";
 import { blacklist } from "./options";
+import makeWebView from "./util/makeWebView";
 
 enum InputType {
 	LIST,
@@ -151,8 +152,6 @@ export default async function interactive() {
 					pattern: /[a-z -]/i,
 				});
 
-				if (firstName === null) return;
-
 				if (!firstName) {
 					process.stdout.write(chalk.gray("No first name provided"));
 				}
@@ -169,8 +168,6 @@ export default async function interactive() {
 						pattern: /[a-z -]/i,
 					});
 
-					if (lastName === null) return;
-
 					if (!lastName) {
 						process.stdout.write(chalk.gray("No last name provided"));
 						firstName = null;
@@ -184,8 +181,6 @@ export default async function interactive() {
 				const location = await input(InputType.STRING, {
 					displayMode: DisplayMode.CAPITALIZE,
 				});
-
-				if (location === null) return;
 
 				if (!location) {
 					process.stdout.write(chalk.gray("No location provided"));
@@ -300,6 +295,10 @@ export default async function interactive() {
 								binings: [{ touch: "o" }, { touch: "s", control: true }],
 							},
 							{
+								label: "Web view",
+								binings: [{ touch: "w" }],
+							},
+							{
 								label: "Main menu",
 								binings: [{ touch: "m" }, { touch: "z", control: true }],
 							},
@@ -330,12 +329,33 @@ export default async function interactive() {
 									`Data successfully written to ${chalk.cyan(path)}.`
 								);
 
-								setTimeout(() => {
-									console.clear();
-									console.log(HEADER);
-									console.log(result.toString(true));
-									console.log(controlRow);
-								}, 2000);
+								await Bun.sleep(2000);
+								console.clear();
+								console.log(HEADER);
+								console.log(result.toString(true));
+								console.log(controlRow);
+							},
+						},
+						{
+							keys: [{ touch: "w" }],
+							async action() {
+								console.clear();
+								console.log(HEADER);
+
+								makeWebView(result);
+								console.log(
+									`Opening web view for ${chalk.cyan(
+										result.likely.usernames?.[0]?.value ??
+											result.likely.firstName?.value ??
+											"unknown"
+									)}...`
+								);
+
+								await Bun.sleep(2000);
+								console.clear();
+								console.log(HEADER);
+								console.log(result.toString(true));
+								console.log(controlRow);
 							},
 						},
 					];

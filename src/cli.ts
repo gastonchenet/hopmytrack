@@ -11,6 +11,7 @@ import interactive from "./interactive";
 import update from "./commands/update";
 import list from "./commands/list";
 import getBlackSheeps from "./util/getBlackSheeps";
+import makeWebView from "./util/makeWebView";
 
 const input = Bun.argv[2];
 
@@ -124,6 +125,7 @@ if (Object.values(options).every((value) => !value) && !input) {
 			}
 		});
 
-		lookup(data);
+		const result = await lookup(data);
+		if (options.webview) makeWebView(result);
 	}
 }

@@ -5,11 +5,11 @@ export default function capitalize<T extends string | null>(
 	if (!str) return null;
 
 	if (!allFirstLetters) {
-		return str.charAt(0).toUpperCase() + str.slice(1);
+		return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 	} else {
 		return str
 			.split(" ")
-			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
 			.join(" ") as T;
 	}
 }

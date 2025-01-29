@@ -104,6 +104,7 @@ type LikelyResult = {
 };
 
 type JSONResult = {
+	id: string;
 	title: string;
 	url: string | null;
 	nsfw: boolean;
@@ -222,6 +223,24 @@ export default class Result {
 		return result;
 	}
 
+	public static fromJSON(data: JSONResult): Result {
+		return new Result({
+			id: data.id,
+			title: data.title,
+			url: data.url,
+			nsfw: data.nsfw,
+			fetched: data.fetched,
+			prob: data.prob,
+			usernames: data.usernames,
+			firstNames: data.firstNames,
+			lastNames: data.lastNames,
+			locations: data.locations,
+			emails: data.emails,
+			phones: data.phones,
+			urls: data.urls.map((url) => Result.fromJSON(url)),
+		});
+	}
+
 	public id: string;
 	public title: string;
 	public type: Type | null;
@@ -280,6 +299,18 @@ export default class Result {
 
 	public get username(): ProbValue<string> | null {
 		return this.usernames[0] ?? null;
+	}
+
+	public get depth(): number {
+		let depth = 0;
+		let current: Result | null = this;
+
+		while (current) {
+			depth++;
+			current = current.parent;
+		}
+
+		return depth;
 	}
 
 	public hasInfoInUsername(values: ProbValue<string>[]) {
@@ -471,6 +502,7 @@ export default class Result {
 
 	public toJSON(): JSONResult {
 		return {
+			id: this.id,
 			title: this.title,
 			url: this.url,
 			nsfw: this.nsfw,
@@ -940,10 +972,10 @@ export default class Result {
 				existing.prob = (existing.prob + prob) / 2;
 
 			prob = this.prob + (Prob.SURE - this.prob) * existing.prob;
-			this.used.add("email:" + email.value);
 		}
 
 		prob = isFinite(prob) ? prob : Prob.SURE;
+		this.used.add("email:" + email.value);
 
 		const data: ProbValue<Email> = {
 			...email,

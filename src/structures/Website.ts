@@ -163,9 +163,7 @@ export default class Website {
 
 					if (!response.ok) {
 						if (json.requestInterval && (!options.proxy || json.disableProxy))
-							await new Promise((resolve) =>
-								setTimeout(resolve, json.requestInterval)
-							);
+							await Bun.sleep(json.requestInterval);
 
 						continue;
 					}
@@ -182,9 +180,7 @@ export default class Website {
 							response.url === json.errorUrl)
 					) {
 						if (json.requestInterval && (!options.proxy || json.disableProxy))
-							await new Promise((resolve) =>
-								setTimeout(resolve, json.requestInterval)
-							);
+							await Bun.sleep(json.requestInterval);
 
 						continue;
 					}
@@ -253,9 +249,7 @@ export default class Website {
 					results.push(result);
 
 					if (json.requestInterval && (!options.proxy || json.disableProxy))
-						await new Promise((resolve) =>
-							setTimeout(resolve, json.requestInterval)
-						);
+						await Bun.sleep(json.requestInterval);
 				}
 
 				return results;
