@@ -41,14 +41,85 @@ chmod +x $hmt_root/bin/hmt ||
 
 echo "HopMyTrack succesfully installed!"
 
-# Adding the executable to the PATH
-if ! grep -q $hmt_root/bin <<< $PATH; then
-  export PATH="$PATH:$hmt_root/bin"
+refresh_command=""
 
-  echo "" >> "$HOME/.bashrc"
-  echo "# HopMyTrack" >> "$HOME/.bashrc"
-  echo "export PATH=\"\$PATH:$hmt_root/bin\"" >> "$HOME/.bashrc"
+case $SHELL in
+	*/fish)
+		command="set --export PATH $hmt_root/bin \$PATH"
+		fish_config=$HOME/.config/fish/config.fish
 
-  echo ""
-  echo "Please restart your terminal or run \"source ~/.bashrc\" to be able to use the command 'hmt'"
+		if [[ -w $fish_config ]]; then
+			{
+				echo -e "\n# HopMyTrack"
+				echo $command
+			} >> $fish_config
+
+			echo "HopMyTrack path added to $fish_config"
+
+			refresh_command="source $fish_config"
+		else
+			error "Failed to add HopMyTrack path to $fish_config"
+		fi ;;
+	*/zsh)
+		command="export PATH=\"$hmt_root/bin:\$PATH\""
+		zsh_config=$HOME/.zshrc
+
+		if [[ -w $zsh_config ]]; then
+			{
+				echo -e "\n# HopMyTrack"
+				echo $command
+			} >> $zsh_config
+
+			echo "HopMyTrack path added to $zsh_config"
+
+			refresh_command="exec $SHELL -l"
+		else
+			error "Failed to add HopMyTrack path to $zsh_config"
+		fi ;;
+	*/bash)
+		command="export PATH=\"$hmt_root/bin:\$PATH\""
+
+		bash_configs=(
+			"$HOME/.bashrc"
+			"$HOME/.bash_profile"
+		)
+
+		if [[ ${XDG_CONFIG_HOME:-} ]]; then
+			bash_configs+=(
+				"$XDG_CONFIG_HOME/bashrc"
+				"$XDG_CONFIG_HOME/bash_profile"
+				"$XDG_CONFIG_HOME/.bashrc"
+				"$XDG_CONFIG_HOME/.bash_profile"
+			)
+		fi
+
+		set_manually=true
+		for bash_config in "${bash_configs[@]}"; do
+			if [[ -w $bash_config ]]; then
+				{
+					echo -e "\n# HopMyTrack"
+					echo $command
+				} >> $bash_config
+
+				echo "HopMyTrack path added to $bash_config"
+
+				refresh_command="source $bash_config"
+				set_manually=false
+			fi
+		done
+
+		if [[ $set_manually = true ]]; then
+			echo "HopMyTrack path not added to any bash config file"
+			echo "Please add the following line to your bash config file:"
+			echo $command
+		fi ;;
+	*)
+		echo "Unsupported shell: $SHELL"
+		echo "Please add the following line to your shell config file:"
+		echo $command ;;
+esac
+
+if [[ $refresh_command ]]; then
+	echo "Refreshing shell..."
+	eval $refresh_command
 fi
