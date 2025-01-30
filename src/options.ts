@@ -99,8 +99,8 @@ export const optionList: Record<string, OptionPayload<OptionPayloadType>> = {
 		default: false,
 	},
 	webview: {
-		alias: "w",
-		unique: true,
+		alias: "W",
+		unique: false,
 		type: OptionPayloadType.BOOLEAN,
 		description: "Open the output in a webview.",
 		usage: "--webview",

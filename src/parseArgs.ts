@@ -1,3 +1,7 @@
+import chalk from "chalk";
+
+const hasColors = !/(\s|^)-(-no-color|[^-]*c[^-]*)/.test(Bun.argv.join(" "));
+
 export enum OptionPayloadType {
   BOOLEAN = "boolean",
   NUMBER = "number",
@@ -74,20 +78,23 @@ function parseArgs(
       const value = rawArgs.join(" ");
 
       if (!optionList[name]) {
-        throw new Error(`Unknown option '${name}'`);
+				console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Unknown option '${name}'`);
+				process.exit(1);
       }
 
       const type = optionList[name].type;
 
       if (hasUnique) {
-        throw new Error("Usage of multiple unique options is not allowed");
+				console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Usage of multiple unique options is not allowed`);
+				process.exit(1);
       }
 
       hasUnique = optionList[name].unique;
 
       if (name in optionList && type === OptionPayloadType.NUMBER && value) {
         if (isNaN(parseInt(value))) {
-          throw new Error(`Invalid value for option '${name}'`);
+					console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Invalid value for option '${name}'`);
+					process.exit(1);
         }
 
         options[name] = parseInt(value);
@@ -99,18 +106,19 @@ function parseArgs(
         } else if (type === OptionPayloadType.ARRAY) {
           options[name] = value.split(/, */);
         } else {
-          throw new Error(
-            `Invalid type for option '${name}', should be '${type}'`
-          );
-        }
+					console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Invalid type for option '${name}', should be '${type}'`);
+					process.exit(1);
+				}
       } else if (name in optionList) {
         if (type !== "boolean") {
-          throw new Error(`Missing value for option '${name}'`);
+					console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Missing value for option '${name}'`);
+					process.exit(1);
         }
 
         options[name] = true;
       } else {
-        throw new Error(`Unknown option '${name}'`);
+				console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Unknown option '${name}'`);
+				process.exit(1);
       }
     } else if (arg.startsWith("-")) {
       const foundOptions = [];
@@ -124,14 +132,16 @@ function parseArgs(
               foundOptions.push({ name, ...option });
               if (option.type !== "boolean") continue;
             } else {
-              throw new Error(`Cannot stack non-boolean options '${name}'`);
-            }
+							console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Cannot stack non-boolean options '${name}'`);
+							process.exit(1);
+						}
           }
         }
 
         if (foundOptions.length === 1 && foundOptions[0].type !== "boolean") {
           if (hasUnique) {
-            throw new Error("Usage of multiple unique options is not allowed");
+						console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Usage of multiple unique options is not allowed`);
+						process.exit(1);
           }
 
           hasUnique = foundOptions[0].unique;
@@ -140,9 +150,8 @@ function parseArgs(
           i++;
 
           if (!/[= ]/.test(arg[i])) {
-            throw new Error(
-              `Missing value for option '${foundOptions[0].name}'`
-            );
+						console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Missing value for option '${foundOptions[0].name}'`);
+						process.exit(1);
           }
 
           i++;
@@ -159,7 +168,8 @@ function parseArgs(
             optionType === OptionPayloadType.NUMBER &&
             isNaN(parseInt(value))
           ) {
-            throw new Error(`Invalid value for option '${optionName}'`);
+						console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Invalid value for option '${optionName}'`);
+						process.exit(1);
           } else if (optionType === OptionPayloadType.BOOLEAN) {
             options[optionName] = value === "true";
           } else {
@@ -174,7 +184,8 @@ function parseArgs(
       }
 
       if (foundOptions.length === 0) {
-        throw new Error(`Unknown option '${arg}'`);
+				console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Unknown option '${arg}'`);
+				process.exit(1);
       }
 
       if (foundOptions.length === 1 && foundOptions[0].type !== "boolean") {
@@ -183,7 +194,8 @@ function parseArgs(
 
       foundOptions.forEach((option) => {
         if (hasUnique) {
-          throw new Error("Usage of multiple unique options is not allowed");
+					console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Usage of multiple unique options is not allowed`);
+					process.exit(1);
         }
 
         hasUnique = option.unique;
@@ -191,11 +203,11 @@ function parseArgs(
         if (option.type === OptionPayloadType.BOOLEAN) {
           options[option.name as keyof typeof options] = true;
         } else if (option.type === OptionPayloadType.STRING) {
-          throw new Error(`Missing value for option '${option.name}'`);
+					console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Missing value for option '${option.name}'`);
+					process.exit(1);
         } else {
-          throw new Error(
-            `Invalid type for option '${option.name}' should be '${option.type}'`
-          );
+					console.error(`${hasColors ? chalk.red("Error:") : "Error:"} Cannot stack non-boolean options '${option.name}'`);
+					process.exit(1);
         }
       });
     }
